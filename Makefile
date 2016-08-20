@@ -1,4 +1,4 @@
-# VV4OS Makefile. Here are the main targets:
+#m VV4OS Makefile. Here are the main targets:
 # I.   all (can be called without specifying the target) - builds everything.
 # Doesn't set special options for Debug or Release build.
 # II.  Debug - builds everything as a Debug build.
@@ -36,15 +36,17 @@ ASM=nasm
 ASMFLAGS=-felf32
 
 CC=/home/alexander/opt/cross/bin/i686-elf-gcc
-CFLAGS=-Wall -Wextra -Werror -ffreestanding -std=c11 -c -Iinclude
+CFLAGS=-Wall -Wextra -Werror -ffreestanding -std=c11 -c -I.
 
 LINKER=/home/alexander/opt/cross/bin/i686-elf-gcc
 LFLAGS=-ffreestanding -nostdlib -lgcc -T linker.ld
 
 # Files.
 
-SOURCES=$(wildcard *.c) $(wildcard */*.c) $(wildcard */*/*.c) $(wildcard */*/*/*.c) $(wildcard */*/*/*/*.c)\
-	$(wildcard *.asm) $(wildcard */*.asm) $(wildcard */*/*.asm) $(wildcard */*/*/*/.asm) $(wildcard */*/*/*/*/.asm)
+SOURCES=$(wildcard *.c) $(wildcard */*.c) $(wildcard */*/*.c) \
+		$(wildcard */*/*/*.c) $(wildcard */*/*/*/*.c) \
+		$(wildcard *.asm) $(wildcard */*.asm) $(wildcard */*/*.asm) \
+		$(wildcard */*/*/*/.asm) $(wildcard */*/*/*/*/.asm)
 
 OBJECTS=$(SOURCES:=.o)
 

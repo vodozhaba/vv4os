@@ -5,6 +5,8 @@
  * Purpose:    The main file of the project, connects all the modules.        *
  ******************************************************************************/
 
-void main() {
+#include "io/vga_terminal.h"
 
+void main() {
+    VgaTerminalInit();
 }
