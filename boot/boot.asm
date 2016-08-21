@@ -1,6 +1,6 @@
 ; File: boot/boot.asm
 ; Author: velikiyv4
-; Created on: 08/20/2016
+; Created on: Aug 20, 2016
 ; Purpose: Sets up stack and calls main().
 
 ; Multiboot flags
