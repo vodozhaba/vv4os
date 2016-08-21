@@ -13,7 +13,7 @@ static unsigned int digits(unsigned int x, int base) {
     return ret;
 }
 
-static char* utoa(unsigned int value, char* str, int base) {
+char* utoa(unsigned int value, char* str, int base) {
     if(base < 2 || base > 36)
         return NULL;
     static const char* alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
