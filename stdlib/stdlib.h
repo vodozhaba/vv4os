@@ -8,4 +8,6 @@
 #pragma once
 
 char* utoa(unsigned int value, char* str, int base);
+char* utoa_lc(unsigned int value, char* str, int base);
 char* itoa(int value, char* str, int base);
+char* itoa_lc(int value, char* str, int base);

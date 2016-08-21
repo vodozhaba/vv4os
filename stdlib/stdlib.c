@@ -26,10 +26,31 @@ char* utoa(unsigned int value, char* str, int base) {
     return str;
 }
 
+char* utoa_lc(unsigned int value, char* str, int base) {
+    if(base < 2 || base > 36)
+        return NULL;
+    static const char* alphabet = "0123456789abcdefghijklmnopqrstuvwxyz";
+    int len = digits(value, base);
+    for(int i = len - 1; i >= 0; --i) {
+        str[i] = alphabet[value % base];
+        value /= base;
+    }
+    str[len] = 0;
+    return str;
+}
+
 char* itoa(int value, char* str, int base) {
     if(value < 0) {
         str[0] = '-';
         return utoa(-value, str + 1, base);
     }
     return utoa(value, str, base);
+}
+
+char* itoa_lc(int value, char* str, int base) {
+    if(value < 0) {
+        str[0] = '-';
+        return utoa_lc(-value, str + 1, base);
+    }
+    return utoa_lc(value, str, base);
 }
