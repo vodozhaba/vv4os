@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include <stddef.h>
+#include <stdint.h>
 
 static unsigned int digits(unsigned int x, int base) {
     if(x == 0)
@@ -55,4 +56,20 @@ char* itoa_lc(int value, char* str, int base) {
         return utoa_lc(-value, str + 1, base);
     }
     return utoa_lc(value, str, base);
+}
+
+void* memcpy(void* dest, void* src, size_t num) {
+    uint32_t* dest_u32 = dest;
+    uint32_t* src_u32 = src;
+    size_t num_u32 = num / 4;
+    uint8_t* dest_u8 = dest + num_u32 * 4;
+    uint8_t* src_u8 = src + num_u32 * 4;
+    size_t num_u8 = num % 4;
+    for(size_t i = 0; i < num_u32; ++i) {
+        dest_u32[i] = src_u32[i];
+    }
+    for(size_t i = 0; i < num_u8; ++i) {
+        dest_u8[i] = src_u8[i];
+    }
+    return dest;
 }
