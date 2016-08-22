@@ -72,20 +72,16 @@ static int Scroll() {
     return MoveCursorAt(current_x, current_y - 1);
 }
 
-static int AdvanceCursor() {
-    int res;
-    if(current_x == VGA_BUFFER_WIDTH - 1) {
-        res = MoveCursorAt(0, current_y);
+static int AdvanceCursor(int n) {
+    int value = current_x + n; /* I don't know how to name it */
+    int lines = value / VGA_BUFFER_WIDTH;
+    int new_x = value % VGA_BUFFER_WIDTH;
+    while(current_y + lines >= VGA_BUFFER_HEIGHT) {
+        int res = Scroll();
         if(res != 0)
             return res;
-        if(current_y == VGA_BUFFER_HEIGHT - 1) {
-            res = Scroll();
-            if(res != 0)
-                return res;
-        }
-        return MoveCursorAt(0, current_y + 1);
     }
-    return MoveCursorAt(current_x + 1, current_y);
+    return MoveCursorAt(new_x, current_y + lines);
 }
 
 int VgaTerminalInit() {
@@ -109,7 +105,7 @@ int VgaTerminalPut(char c) {
             ConstructVgaEntry(c, current_color_scheme));
     if(res != 0)
         return res;
-    return AdvanceCursor();
+    return AdvanceCursor(1);
 }
 
 void VgaTerminalSwitchColorScheme(vga_color_scheme color_scheme) {
