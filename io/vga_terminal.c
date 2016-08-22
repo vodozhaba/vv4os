@@ -69,6 +69,12 @@ static int Scroll() {
                 return res;
         }
     }
+    vga_entry whitespace = ConstructVgaEntry(' ', current_color_scheme);
+    for(int x = 0; x < VGA_BUFFER_WIDTH; ++x) {
+        res = SetEntryAt(x, VGA_BUFFER_HEIGHT - 1, whitespace);
+        if(res != 0)
+            return res;
+    }
     return MoveCursorAt(current_x, current_y - 1);
 }
 
