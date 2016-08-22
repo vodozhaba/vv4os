@@ -8,8 +8,10 @@
 #include <stddef.h>
 
 static unsigned int digits(unsigned int x, int base) {
-    int pow = base, ret;
-    for(ret = 1; x >= (unsigned int) pow; ++ret, pow *= base);
+    if(x == 0)
+        return 1;
+    unsigned int ret;
+    for(ret = 0; x > 0; x /= base, ++ret);
     return ret;
 }
 
