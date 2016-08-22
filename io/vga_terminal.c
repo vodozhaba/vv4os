@@ -83,7 +83,7 @@ static int AdvanceCursor() {
             if(res != 0)
                 return res;
         }
-        return MoveCursorAt(current_x, current_y + 1);
+        return MoveCursorAt(0, current_y + 1);
     }
     return MoveCursorAt(current_x + 1, current_y);
 }
