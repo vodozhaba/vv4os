@@ -73,3 +73,22 @@ void* memcpy(void* dest, void* src, size_t num) {
     }
     return dest;
 }
+
+void* memset(void* ptr, int value, size_t num) {
+    uint8_t value_u8 = (uint8_t) value;
+    uint32_t value_u32 = value_u8 |
+            value_u8 << 8 |
+            value_u8 << 16 |
+            value_u8 << 24;
+    size_t num_u32 = num / 4;
+    size_t num_u8 = num % 4;
+    uint32_t* ptr_u32 = ptr;
+    uint8_t* ptr_u8 = ptr + num_u32 * 4;
+    for(size_t i = 0; i < num_u32; ++i) {
+        ptr_u32[i] = value_u32;
+    }
+    for(size_t i = 0; i < num_u8; ++i) {
+        ptr_u8[i] = value_u8;
+    }
+    return ptr;
+}
