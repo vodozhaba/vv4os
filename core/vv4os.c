@@ -5,8 +5,17 @@
  * Purpose:    The main file of the project, connects all the modules.        *
  ******************************************************************************/
 
+#include "arch/x86/gdt.h"
 #include "io/vga_terminal.h"
+#include "stdlib/stdio.h"
+
+static void InitAll() {
+    VgaTerminalInit();
+    printf("Initialized VGA terminal\n");
+    InitGdt();
+    printf("Initialized GDT\n");
+}
 
 void main() {
-    VgaTerminalInit();
+    InitAll();
 }
