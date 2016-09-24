@@ -1,8 +1,9 @@
 #m VV4OS Makefile. Here are the main targets:
-# I.   all (can be called without specifying the target) - builds everything.
-# Doesn't set special options for Debug or Release build.
-# II.  Debug - builds everything as a Debug build.
-# III. Release - builds everything as a Release build.
+# I.   all (can be called without specifying the target) - builds release
+# version for x86.
+# II.  (arch)-debug - builds debug build for (arch). Currently only x86 is
+# supported.
+# III. (arch)-release - builds release build for (arch).
 # IV.  install (run as root) - copies the kernel to a disk image.
 # V.   clean - removes the files that are created by this build system.
 # and thus can be recovered.
@@ -77,7 +78,10 @@ KERNEL_DEST_NAME=kernel.elf
 # Build everything (currently only the kernel).
 # You can simply call make if you want to do it.
 
-all: $(KERNEL)
+all: x86-release
+
+x86-all: CFLAGS += -D__X86__
+x86-all: $(KERNEL)
 
 # Installs the kernel to a disk image.
 
@@ -107,11 +111,11 @@ $(KERNEL): $(OBJECTS)
 clean:
 	$(RM) $(RMFLAGS) $(OBJECTS) $(KERNEL)
 
-Debug: CFLAGS += -DDEBUG -g
-Debug: all
+x86-debug: CFLAGS += -DDEBUG -g
+x86-debug: x86-all
 
-Release: CFLAGS += -DRELEASE
-Release: all
+x86-release: CFLAGS += -O3 -DRELEASE
+x86-release: x86-all
 
 # Stuff for Code::Blocks
 
