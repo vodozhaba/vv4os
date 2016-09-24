@@ -107,11 +107,16 @@ int VgaTerminalInit() {
 
 int VgaTerminalPut(char c) {
     int res;
-    res = SetEntryAt(current_x, current_y,
-            ConstructVgaEntry(c, current_color_scheme));
-    if(res != 0)
-        return res;
-    return AdvanceCursor(1);
+    switch(c) {
+        case '\n':
+            return AdvanceCursor(VGA_BUFFER_WIDTH - current_x);
+        default:
+            res = SetEntryAt(current_x, current_y,
+                    ConstructVgaEntry(c, current_color_scheme));
+            if(res != 0)
+                return res;
+            return AdvanceCursor(1);
+    }
 }
 
 void VgaTerminalSwitchColorScheme(vga_color_scheme color_scheme) {
