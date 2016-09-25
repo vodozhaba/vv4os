@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-static GdtDesc gdt[3];
+static GdtDesc gdt[5];
 
 static GdtAccessByte ConstructGdtAccessByte(bool opt_rights, bool dc,
         bool is_code, uint8_t dpl) {
@@ -42,11 +42,19 @@ static GdtDesc ConstructGdtEntry(uint32_t limit, uint32_t base,
 void InitGdt() {
     GdtDesc desc = { };
     gdt[0] = desc;
-    GdtAccessByte access_byte = ConstructGdtAccessByte(false, false, true, 0);
-    desc = ConstructGdtEntry(0xFFFFF, 0, access_byte, true, true);
+    GdtAccessByte access_byte = ConstructGdtAccessByte(true, false, true, 0);
+    desc = ConstructGdtEntry(8192, 0, access_byte, true, true);
     gdt[1] = desc;
     access_byte = ConstructGdtAccessByte(true, false, false, 0);
-    desc = ConstructGdtEntry(0xFFFFF, 0, access_byte, true, true);
+    desc = ConstructGdtEntry(8192, 0, access_byte, true, true);
     gdt[2] = desc;
+    access_byte = ConstructGdtAccessByte(true, false, true, 3);
+    desc = ConstructGdtEntry(0xFFFFF - 8192, 0x2000000, access_byte, true,
+            true);
+    gdt[3] = desc;
+    access_byte = ConstructGdtAccessByte(true, false, false, 3);
+    desc = ConstructGdtEntry(0xFFFFF - 8192, 0x2000000, access_byte, true,
+            true);
+    gdt[4] = desc;
     SetGdt(gdt, sizeof(gdt) / sizeof(GdtDesc));
 }
