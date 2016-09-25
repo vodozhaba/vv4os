@@ -25,13 +25,6 @@ int _puts(const char* s) {
 }
 
 int printf(const char* fmt, ...) {
-    int n_args = 0;
-    for(size_t i = 0; fmt[i]; ++i) {
-        if(fmt[i] == '%') {
-            ++n_args;
-            ++i; /* "%%" would otherwise break it */
-        }
-    }
     va_list args;
     va_start(args, fmt);
     for(size_t i = 0; fmt[i]; ++i) {
