@@ -17,7 +17,7 @@ typedef struct {
 
 typedef struct {
     uint8_t rpl : 2; // Requested Privilege Level
-    bool local : 1;
+    bool local : 1; // 1 => LDT selector instead of GDT
     uint16_t offset : 13;
 } __attribute__((packed)) GdtSelector;
 
@@ -49,4 +49,5 @@ static inline void SetGdt(GdtDesc* gdt, uint32_t amount) {
     __asm volatile("lgdt (%0)" : : "a" (&gdtr));
 }
 
+GdtSelector ConstructGdtSelector(uint8_t rpl, bool local, uint16_t offset);
 void InitGdt();

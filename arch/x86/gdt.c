@@ -39,6 +39,14 @@ static GdtDesc ConstructGdtEntry(uint32_t limit, uint32_t base,
     return ret;
 }
 
+GdtSelector ConstructGdtSelector(uint8_t rpl, bool local, uint16_t offset) {
+    GdtSelector ret;
+    ret.rpl = rpl;
+    ret.local = local;
+    ret.offset = offset;
+    return ret;
+}
+
 void InitGdt() {
     GdtDesc desc = { };
     gdt[0] = desc;
