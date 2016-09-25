@@ -1,4 +1,4 @@
-#m VV4OS Makefile. Here are the main targets:
+# VV4OS Makefile. Here are the main targets:
 # I.   all (can be called without specifying the target) - builds release
 # version for x86.
 # II.  (arch)-debug - builds debug build for (arch). Currently only x86 is
