@@ -38,8 +38,8 @@ typedef struct {
     GdtAccessByte access_byte;
     uint8_t limit_high : 4;
     uint8_t zero : 2;
-    bool is_32bit;
-    bool page_gr;
+    bool is_32bit : 1;
+    bool page_gr : 1;
     uint8_t base_high;
 } __attribute__((packed)) GdtDesc;
 
