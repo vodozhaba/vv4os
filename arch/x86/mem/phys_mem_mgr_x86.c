@@ -9,13 +9,17 @@
 #include <stddef.h>
 #include "stdlib/stdlib.h"
 
-static uint32_t total_ram;
 static uint32_t bitmap[4096];
+static uint32_t total_frames;
 
 void X86PhysMemMgrInit(size_t ram_size) {
-    total_ram = ram_size;
-    memset(bitmap, 0, sizeof(bitmap));
-    // TODO allocate all frames outside of memory
+    total_frames = ram_size / 4096;
+    memset(bitmap, 0xFF, sizeof(bitmap)); // If there's a bug, let it better
+                                          // not give free memory than give
+                                          // some already allocated
+    for(uint32_t frame = 16384; frame < total_frames; frame++) {
+        bitmap[frame / 32] &= ~(1 << (frame % 32));
+    }
 }
 
 void* X86PhysAllocateFrame() {
@@ -32,5 +36,8 @@ void* X86PhysAllocateFrame() {
 
 void X86PhysFreeFrame(void* ptr) {
     uint32_t frame = (uint32_t) ptr / 4096;
-    bitmap[frame / 8] &= ~(1 << (frame % 8));
+    if(frame >= total_frames) {
+        return;
+    }
+    bitmap[frame / 32] &= ~(1 << (frame % 32));
 }
