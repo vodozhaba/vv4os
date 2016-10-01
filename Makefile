@@ -47,7 +47,7 @@ LFLAGS=-ffreestanding -nostdlib -lgcc -T linker.ld
 SOURCES=$(wildcard *.c) $(wildcard */*.c) $(wildcard */*/*.c) \
 		$(wildcard */*/*/*.c) $(wildcard */*/*/*/*.c) \
 		$(wildcard *.asm) $(wildcard */*.asm) $(wildcard */*/*.asm) \
-		$(wildcard */*/*/*/.asm) $(wildcard */*/*/*/*/.asm)
+		$(wildcard */*/*/*.asm) $(wildcard */*/*/*/*.asm)
 
 OBJECTS=$(SOURCES:=.o)
 
