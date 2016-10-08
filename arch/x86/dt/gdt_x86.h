@@ -61,4 +61,10 @@ typedef struct {
     uint32_t base;
 } __attribute__((packed)) Gdtr;
 
+typedef struct {
+    uint8_t rpl : 2;
+    bool ldt : 1;
+    uint16_t index : 13;
+} __attribute__((packed)) GdtSelector;
+
 void X86GdtInit();
