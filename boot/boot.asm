@@ -66,7 +66,7 @@ Use32
 	mov esp, stack_top ; Stack grows in a backwards direction
 	extern main
 	call main
-	cli ; If _kmain returns, we will halt the computer
+	cli ; If main returns, we will halt the computer
 .halt:
 	hlt
 	jmp .halt
