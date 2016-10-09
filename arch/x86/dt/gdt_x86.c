@@ -7,7 +7,7 @@
 
 #include "gdt_x86.h"
 
-extern void SetGdtr(Gdtr* gdtr);
+extern void X86SetGdtr(Gdtr* gdtr);
 
 static GdtEntry gdt[8192];
 static Gdtr gdtr;
@@ -15,7 +15,7 @@ static Gdtr gdtr;
 static void UpdateGdt(GdtEntry* gdt, uint16_t entries) {
     gdtr.base = (uint32_t) gdt;
     gdtr.size = entries * sizeof(GdtEntry) - 1;
-    SetGdtr(&gdtr);
+    X86SetGdtr(&gdtr);
 }
 
 static void SetGdtEntry(uint16_t n, uint32_t base, uint32_t limit, uint8_t

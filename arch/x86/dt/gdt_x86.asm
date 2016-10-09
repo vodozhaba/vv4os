@@ -5,8 +5,8 @@
 
  section .text
  Use32
- 	global SetGdtr
- 	SetGdtr:
+ 	global X86SetGdtr
+ 	X86SetGdtr:
  		push ebp
  		mov ebp, esp
  		mov eax, [ebp+8]
@@ -18,5 +18,6 @@
 		mov es, ax
 		mov fs, ax
 		mov gs, ax
+		mov ss, ax
  		leave
  		ret
