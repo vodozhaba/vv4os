@@ -33,7 +33,7 @@ static void RegisterInterrupt(uint8_t n, void (*handler)(), uint8_t type) {
     __asm volatile("popf");
 }
 
-void X86IsrHandler(InterruptedCpuState state) {
+void X86IsrHandler(__attribute__((unused)) InterruptedCpuState state) {
 
 }
 
