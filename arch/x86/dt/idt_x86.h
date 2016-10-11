@@ -25,7 +25,7 @@ typedef struct {
 
 typedef struct {
     uint32_t ds;
-    uint32_t ed;
+    uint32_t edi;
     uint32_t esi;
     uint32_t ebp;
     uint32_t esp;
