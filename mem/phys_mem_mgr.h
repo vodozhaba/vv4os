@@ -16,6 +16,10 @@ void X86PhysFreeFrame(void* ptr);
 #error "Cannot determine target architecture"
 #endif
 
+#if defined(__X86__)
+#define FRAME_SIZE 4096
+#endif
+
 static inline void PhysMemMgrInit(size_t ram_size) {
 #if defined(__X86__)
     X86PhysMemMgrInit(ram_size);
