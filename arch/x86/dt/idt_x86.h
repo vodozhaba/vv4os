@@ -98,6 +98,23 @@ extern void X86Isr29();
 extern void X86Isr30();
 extern void X86Isr31();
 
+extern void X86Irq0();
+extern void X86Irq1();
+extern void X86Irq2();
+extern void X86Irq3();
+extern void X86Irq4();
+extern void X86Irq5();
+extern void X86Irq6();
+extern void X86Irq7();
+extern void X86Irq8();
+extern void X86Irq9();
+extern void X86Irq10();
+extern void X86Irq11();
+extern void X86Irq12();
+extern void X86Irq13();
+extern void X86Irq14();
+extern void X86Irq15();
+
 // I've gone mad
 
 extern void X86SoftInt30h();

@@ -39,6 +39,15 @@ Use32
  		jmp X86SoftIntCommon
  	%endmacro
 
+ 	%macro X86Irq 2
+ 	global X86Irq%1
+ 	X86Irq%1:
+ 		cli
+ 		push dword 0
+ 		push dword 0x%2
+ 		jmp X86IrqCommon
+ 	%endmacro
+
  	X86IsrNoErr 0
  	X86IsrNoErr 1
  	X86IsrNoErr 2
@@ -71,6 +80,24 @@ Use32
  	X86IsrNoErr 29
  	X86IsrNoErr 30
  	X86IsrNoErr 31
+
+	X86Irq 0,  20
+	X86Irq 1,  21
+	X86Irq 2,  22
+	X86Irq 3,  23
+	X86Irq 4,  24
+	X86Irq 5,  25
+	X86Irq 6,  26
+	X86Irq 7,  27
+	X86Irq 8,  28
+	X86Irq 9,  29
+	X86Irq 10, 2A
+	X86Irq 11, 2B
+	X86Irq 12, 2C
+	X86Irq 13, 2D
+	X86Irq 14, 2E
+	X86Irq 15, 2F
+
 
  	X86SoftInt 30
  	X86SoftInt 31
@@ -321,5 +348,27 @@ Use32
 		mov gs, ax
 		popa
 		add esp, 8
+		iret
+
+		X86IrqCommon:
+		pusha
+		xor eax, eax
+		mov ax, ds
+		push eax
+		mov ax, 0x10
+		mov ds, ax
+		mov es, ax
+		mov fs, ax
+		mov gs, ax
+		extern X86IrqHandler
+		call X86IrqHandler
+		pop eax
+		mov ds, ax
+		mov es, ax
+		mov fs, ax
+		mov gs, ax
+		popa
+		add esp, 8
+		sti
 		iret
 

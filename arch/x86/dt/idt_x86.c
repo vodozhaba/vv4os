@@ -7,6 +7,7 @@
 
 #include <stdbool.h>
 #include "idt_x86.h"
+#include "io/ports.h"
 #include "stdlib/stdio.h"
 #include "stdlib/stdlib.h"
 
@@ -39,6 +40,14 @@ void X86IsrHandler(__attribute__((unused)) InterruptedCpuState state) {
 
 void X86SoftIntHandler(__attribute__((unused)) InterruptedCpuState state) {
 
+}
+
+void X86IrqHandler(InterruptedCpuState state) {
+    if(state.interrupt > IRQ(7)) {
+        PortWrite8(0xA0, 0x20);
+        return;
+    }
+    PortWrite8(0x20, 0x20);
 }
 
 void X86IdtInit() {
@@ -76,6 +85,23 @@ void X86IdtInit() {
     RegisterInterrupt(29, X86Isr29, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
     RegisterInterrupt(30, X86Isr20, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
     RegisterInterrupt(31, X86Isr21, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
+
+    RegisterInterrupt(IRQ(0), X86Irq0, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
+    RegisterInterrupt(IRQ(1), X86Irq1, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
+    RegisterInterrupt(IRQ(2), X86Irq2, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
+    RegisterInterrupt(IRQ(3), X86Irq3, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
+    RegisterInterrupt(IRQ(4), X86Irq4, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
+    RegisterInterrupt(IRQ(5), X86Irq5, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
+    RegisterInterrupt(IRQ(6), X86Irq6, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
+    RegisterInterrupt(IRQ(7), X86Irq7, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
+    RegisterInterrupt(IRQ(8), X86Irq8, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
+    RegisterInterrupt(IRQ(9), X86Irq9, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
+    RegisterInterrupt(IRQ(10), X86Irq10, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
+    RegisterInterrupt(IRQ(11), X86Irq11, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
+    RegisterInterrupt(IRQ(12), X86Irq12, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
+    RegisterInterrupt(IRQ(13), X86Irq13, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
+    RegisterInterrupt(IRQ(14), X86Irq14, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
+    RegisterInterrupt(IRQ(15), X86Irq15, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
 
     RegisterInterrupt(0x30, X86SoftInt30h, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
     RegisterInterrupt(0x31, X86SoftInt31h, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
@@ -285,4 +311,19 @@ void X86IdtInit() {
     RegisterInterrupt(0xFD, X86SoftIntFDh, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
     RegisterInterrupt(0xFE, X86SoftIntFEh, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
     RegisterInterrupt(0xFF, X86SoftIntFFh, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
+
+    // Remap master PIC
+    PortWrite8(0x20, 0x11);
+    PortWrite8(0x21, IRQ(0));
+    PortWrite8(0x21, 0x04);
+    PortWrite8(0x21, 0x01);
+    PortWrite8(0x21, 0x00);
+    // Remap slave PIC
+    PortWrite8(0xA0, 0x11);
+    PortWrite8(0xA1, IRQ(8));
+    PortWrite8(0xA1, 0x02);
+    PortWrite8(0xA1, 0x01);
+    PortWrite8(0xA1, 0x00);
+
+    __asm volatile("sti");
 }
