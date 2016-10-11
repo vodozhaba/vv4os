@@ -22,7 +22,7 @@ static void InitAll() {
     printf("Initialized processor descriptor tables\n");
     printf("Detected %dMiB of RAM\n", available_ram / 1048576);
     PhysMemMgrInit(available_ram);
-    printf("Initialized physical memory manager");
+    printf("Initialized physical memory manager\n");
 }
 
 void main(MultibootInformation* mi) {
