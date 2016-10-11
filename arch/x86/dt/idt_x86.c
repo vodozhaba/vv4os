@@ -13,8 +13,12 @@
 
 extern void X86SetIdtr(Idtr* idtr);
 
-IdtEntry idt[256];
-Idtr idtr;
+static InterruptHandler isr_handlers[32];
+static InterruptHandler irq_handlers[16];
+static InterruptHandler soft_int_handlers[208];
+
+static IdtEntry idt[256];
+static Idtr idtr;
 
 static void UpdateIdt(IdtEntry* idt) {
     idtr.base = (uint32_t) idt;
@@ -35,14 +39,23 @@ static void RegisterInterrupt(uint8_t n, void (*handler)(), uint8_t type) {
 }
 
 void X86IsrHandler(__attribute__((unused)) InterruptedCpuState state) {
-
+    if(isr_handlers[state.interrupt]) {
+        isr_handlers[state.interrupt](state);
+    }
 }
 
 void X86SoftIntHandler(__attribute__((unused)) InterruptedCpuState state) {
-
+    uint32_t interrupt = state.interrupt - 0x30;
+    if(soft_int_handlers[interrupt]) {
+        soft_int_handlers[interrupt](state);
+    }
 }
 
 void X86IrqHandler(InterruptedCpuState state) {
+    uint32_t interrupt = state.interrupt - IRQ(0);
+    if(irq_handlers[interrupt]) {
+        irq_handlers[interrupt](state);
+    }
     if(state.interrupt > IRQ(7)) {
         PortWrite8(0xA0, 0x20);
         return;
@@ -326,4 +339,16 @@ void X86IdtInit() {
     PortWrite8(0xA1, 0x00);
 
     __asm volatile("sti");
+}
+
+void X86RegisterIsrHandler(uint8_t n, InterruptHandler handler) {
+    isr_handlers[n] = handler;
+}
+
+void X86RegisterSoftIntHandler(uint8_t n, InterruptHandler handler) {
+    soft_int_handlers[n - 0x30] = handler;
+}
+
+void X86RegisterIrqHandler(uint8_t n, InterruptHandler handler) {
+    irq_handlers[n - IRQ(0)] = handler;
 }

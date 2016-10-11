@@ -42,6 +42,8 @@ typedef struct {
     uint32_t ss;
 } __attribute__((packed)) InterruptedCpuState;
 
+typedef void (*InterruptHandler)(InterruptedCpuState);
+
 #define IDT_ENTRY_TYPE_INTERRUPT_32_RING0 0x8E
 #define IDT_ENTRY_TYPE_INTERRUPT_16_RING0 0x86
 #define IDT_ENTRY_TYPE_TRAP_32_RING0      0x8F
@@ -327,3 +329,6 @@ extern void X86SoftIntFEh();
 extern void X86SoftIntFFh();
 
 void X86IdtInit();
+void X86RegisterIsrHandler(uint8_t n, InterruptHandler handler);
+void X86RegisterSoftIntHandler(uint8_t n, InterruptHandler handler);
+void X86RegisterIrqHandler(uint8_t n, InterruptHandler handler);
