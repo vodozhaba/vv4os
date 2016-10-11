@@ -64,8 +64,10 @@ Use32
 	global _start
 	_start:
 	mov esp, stack_top ; Stack grows in a backwards direction
+	push ebx
 	extern main
 	call main
+	add esp, 4
 	cli ; If main returns, we will halt the computer
 .halt:
 	hlt
