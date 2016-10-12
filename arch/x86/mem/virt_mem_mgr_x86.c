@@ -178,7 +178,7 @@ static void* AllocateRange(uint32_t frames, PageDirectoryEntry* directory) {
 }
 
 // Allocates it at given base in first directory and at free range in second
-// and returns it base in second
+// and returns its base in second
 static void* AllocateRangeInTwoDirectories(void* fixed_base, uint32_t frames,
         PageDirectoryEntry* fixed_base_dir, PageDirectoryEntry* var_base_dir) {
     MarkRange(fixed_base, frames, true, fixed_base_dir);
