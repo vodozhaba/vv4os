@@ -11,6 +11,7 @@
 #include "dt/desc_tables.h"
 #include "io/vga_terminal.h"
 #include "mem/phys_mem_mgr.h"
+#include "mem/virt_mem_mgr.h"
 #include "stdlib/stdio.h"
 
 size_t available_ram;
@@ -23,6 +24,8 @@ static void InitAll() {
     printf("Detected %dMiB of RAM\n", available_ram / 1048576);
     PhysMemMgrInit(available_ram);
     printf("Initialized physical memory manager\n");
+    VirtMemMgrInit();
+    printf("Initialized virtual memory manager\n");
 }
 
 void main(MultibootInformation* mi) {
