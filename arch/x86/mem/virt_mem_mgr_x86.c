@@ -7,7 +7,10 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "arch/x86/dt/idt_x86.h"
+#include "io/vga_terminal.h"
 #include "mem/phys_mem_mgr.h"
+#include "stdlib/stdio.h"
 #include "stdlib/stdlib.h"
 
 typedef struct {
@@ -192,6 +195,19 @@ static void* AllocateRangeInTwoDirectories(void* fixed_base, uint32_t frames,
     return var_base;
 }
 
+static void MapRange(void* virt_base, void* phys_base, uint32_t frames,
+        PageDirectoryEntry* directory) {
+    for(uint32_t frame = 0; frame < frames; frame++) {
+        MapFrame(virt_base + frame * FRAME_SIZE,
+                phys_base + frame * FRAME_SIZE, directory);
+    }
+}
+
+static void IdentityMapRange(void* base, uint32_t frames,
+        PageDirectoryEntry* directory) {
+    MapRange(base, base, frames, directory);
+}
+
 // 'Window' = two ranges in two directories pointing to the same physical range
 // Returns base in kernel directory
 
@@ -213,6 +229,7 @@ void X86NewVirtMemTable(uint32_t proc_id) {
     desc->used = true;
     desc->proc_id = proc_id;
     desc->base = (uint32_t) directory >> 12;
+    IdentityMapRange(NULL, 16384, directory); // kernel memory
 }
 
 int X86DestroyVirtMemTable(uint32_t proc_id) {
@@ -224,6 +241,46 @@ int X86DestroyVirtMemTable(uint32_t proc_id) {
     return 0;
 }
 
-void X86VirtMemMgrInit() {
+int X86SwitchVirtMemTable(uint32_t proc_id) {
+    PageDirectoryEntry* directory = GetPageDirectory(proc_id);
+    if(directory == NULL) {
+        return -1;
+    }
+    __asm volatile("movl %d0, %%cr3" : : "a" (directory));
+    return 0;
+}
 
+void PageFaultHandler(InterruptedCpuState cpu_state) {
+    vga_color_scheme err = {
+            .background = VGA_COLOR_BLACK,
+            .foreground = VGA_COLOR_RED
+    },
+    link = {
+            .background = VGA_COLOR_BLACK,
+            .foreground = VGA_COLOR_BLUE
+    };
+    VgaTerminalSwitchColorScheme(err);
+    uint32_t cr2;
+    __asm volatile("movl %%cr2, %d0" : "=a" (cr2) : );
+    printf("A page fault has occured:\n"
+           "    Error code %d\n"
+           "    Faulting address 0x%x\n"
+           "Write down this message, please, and submit an issue at\n",
+           cpu_state.error_code, cr2);
+    VgaTerminalSwitchColorScheme(link);
+    printf("https://github.com/velikiyv4/VV4OS/issues");
+    __asm volatile("cli");
+    while(true) {
+        __asm volatile("hlt");
+    }
+}
+
+void X86VirtMemMgrInit() {
+    X86RegisterIsrHandler(14, PageFaultHandler);
+    X86NewVirtMemTable(0);
+    X86SwitchVirtMemTable(0);
+    uint32_t cr3;
+    __asm volatile("movl %%cr3, %d0" : "=a" (cr3) : );
+    cr3 |= 0x80000000;
+    __asm volatile("movl %d0, %%cr3" : : "a" (cr3));
 }
