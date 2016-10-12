@@ -279,8 +279,8 @@ void X86VirtMemMgrInit() {
     X86RegisterIsrHandler(14, PageFaultHandler);
     X86NewVirtMemTable(0);
     X86SwitchVirtMemTable(0);
-    uint32_t cr3;
-    __asm volatile("movl %%cr3, %d0" : "=a" (cr3) : );
-    cr3 |= 0x80000000;
-    __asm volatile("movl %d0, %%cr3" : : "a" (cr3));
+    uint32_t cr0;
+    __asm volatile("movl %%cr0, %d0" : "=a" (cr0) : );
+    cr0 |= 0x80000000;
+    __asm volatile("movl %d0, %%cr0" : : "a" (cr0));
 }
