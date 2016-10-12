@@ -30,11 +30,11 @@ static inline uint16_t PortRead16(uint16_t port) {
 }
 
 static inline void PortWrite32(uint16_t port, uint32_t value) {
-    __asm volatile("outl %w0, %w1" : : "a" (value), "d" (port));
+    __asm volatile("outl %d0, %w1" : : "a" (value), "d" (port));
 }
 
 static inline uint32_t PortRead32(uint16_t port) {
     uint32_t ret;
-    __asm volatile("inl %w1, %w0" : "=a" (ret) : "d" (port));
+    __asm volatile("inl %w1, %d0" : "=a" (ret) : "d" (port));
     return ret;
 }
