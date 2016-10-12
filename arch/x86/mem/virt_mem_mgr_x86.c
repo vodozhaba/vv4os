@@ -251,7 +251,7 @@ int X86SwitchVirtMemTable(uint32_t proc_id) {
 }
 
 void PageFaultHandler(InterruptedCpuState cpu_state) {
-    vga_color_scheme err = {
+    VgaColorScheme err = {
             .background = VGA_COLOR_BLACK,
             .foreground = VGA_COLOR_RED
     },

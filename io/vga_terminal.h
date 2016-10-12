@@ -23,13 +23,13 @@
 typedef struct {
     uint8_t foreground :4;
     uint8_t background :4;
-} __attribute__((packed)) vga_color_scheme;
+} __attribute__((packed)) VgaColorScheme;
 
 typedef struct {
     uint8_t character;
-    vga_color_scheme color_scheme;
-} __attribute__((packed)) vga_entry;
+    VgaColorScheme color_scheme;
+} __attribute__((packed)) VgaEntry;
 
 int VgaTerminalInit();
 int VgaTerminalPut(char c);
-void VgaTerminalSwitchColorScheme(vga_color_scheme color_scheme);
+void VgaTerminalSwitchColorScheme(VgaColorScheme color_scheme);

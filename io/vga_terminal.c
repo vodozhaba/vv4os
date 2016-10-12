@@ -13,11 +13,11 @@ static const int VGA_BUFFER_HEIGHT = 25, VGA_BUFFER_WIDTH = 80;
 static const uint8_t STD_FG_COLOR = VGA_COLOR_LIGHT(VGA_COLOR_CYAN),
         STD_BG_COLOR = VGA_COLOR_BLACK;
 
-static vga_color_scheme current_color_scheme;
-static vga_entry* vga_buffer = (vga_entry*) 0xB8000;
+static VgaColorScheme current_color_scheme;
+static VgaEntry* vga_buffer = (VgaEntry*) 0xB8000;
 static int current_x = 0, current_y = 0;
 
-static int SetEntryAt(int x, int y, vga_entry entry) {
+static int SetEntryAt(int x, int y, VgaEntry entry) {
     if (x < 0 || x >= VGA_BUFFER_WIDTH || y < 0 || y >= VGA_BUFFER_HEIGHT)
         return -1;
     int i = y * VGA_BUFFER_WIDTH + x;
@@ -25,7 +25,7 @@ static int SetEntryAt(int x, int y, vga_entry entry) {
     return 0;
 }
 
-static int GetEntryAt(int x, int y, vga_entry* entry) {
+static int GetEntryAt(int x, int y, VgaEntry* entry) {
     if (x < 0 || x >= VGA_BUFFER_WIDTH || y < 0 || y >= VGA_BUFFER_HEIGHT ||
             entry == NULL)
         return -1;
@@ -34,9 +34,9 @@ static int GetEntryAt(int x, int y, vga_entry* entry) {
     return 0;
 }
 
-static vga_entry ConstructVgaEntry (uint8_t character,
-        vga_color_scheme color_scheme) {
-    vga_entry ret;
+static VgaEntry ConstructVgaEntry (uint8_t character,
+        VgaColorScheme color_scheme) {
+    VgaEntry ret;
     ret.character = character;
     ret.color_scheme = color_scheme;
     return ret;
@@ -58,7 +58,7 @@ static int MoveCursorAt(int x, int y) {
 
 static int Scroll() {
     int res;
-    vga_entry entry;
+    VgaEntry entry;
     for(int y = 1; y < VGA_BUFFER_HEIGHT; ++y) {
         for(int x = 0; x < VGA_BUFFER_WIDTH; ++x) {
             res = GetEntryAt(x, y, &entry);
@@ -69,7 +69,7 @@ static int Scroll() {
                 return res;
         }
     }
-    vga_entry whitespace = ConstructVgaEntry(' ', current_color_scheme);
+    VgaEntry whitespace = ConstructVgaEntry(' ', current_color_scheme);
     for(int x = 0; x < VGA_BUFFER_WIDTH; ++x) {
         res = SetEntryAt(x, VGA_BUFFER_HEIGHT - 1, whitespace);
         if(res != 0)
@@ -94,7 +94,7 @@ int VgaTerminalInit() {
     MoveCursorAt(0, 0);
     current_color_scheme.foreground = STD_FG_COLOR;
     current_color_scheme.background = STD_BG_COLOR;
-    vga_entry whitespace = ConstructVgaEntry(' ', current_color_scheme);
+    VgaEntry whitespace = ConstructVgaEntry(' ', current_color_scheme);
     for (int y = 0; y < VGA_BUFFER_HEIGHT; y++) {
         for (int x = 0; x < VGA_BUFFER_WIDTH; x++) {
             int ret = SetEntryAt(x, y, whitespace);
@@ -119,6 +119,6 @@ int VgaTerminalPut(char c) {
     }
 }
 
-void VgaTerminalSwitchColorScheme(vga_color_scheme color_scheme) {
+void VgaTerminalSwitchColorScheme(VgaColorScheme color_scheme) {
     current_color_scheme = color_scheme;
 }
