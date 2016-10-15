@@ -55,7 +55,8 @@ static PageTableEntry* GetPageTableEntryPtr(VirtualAddr vaddr,
     if(pde.present == false) {
         return NULL;
     }
-    PageTableEntry* pte = (PageTableEntry*)(pde.page_table_addr << 12);
+    PageTableEntry* table = (PageTableEntry*)(pde.page_table_addr << 12);
+    PageTableEntry* pte = &table[vaddr.page.table_entry];
     return pte;
 }
 
