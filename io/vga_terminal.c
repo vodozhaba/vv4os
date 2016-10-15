@@ -119,6 +119,10 @@ int VgaTerminalPut(char c) {
     }
 }
 
+VgaColorScheme VgaTerminalGetColorScheme() {
+    return current_color_scheme;
+}
+
 void VgaTerminalSwitchColorScheme(VgaColorScheme color_scheme) {
     current_color_scheme = color_scheme;
 }

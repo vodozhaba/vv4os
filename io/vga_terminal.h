@@ -32,4 +32,5 @@ typedef struct {
 
 int VgaTerminalInit();
 int VgaTerminalPut(char c);
+VgaColorScheme VgaTerminalGetColorScheme();
 void VgaTerminalSwitchColorScheme(VgaColorScheme color_scheme);
