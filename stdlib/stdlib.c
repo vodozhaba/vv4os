@@ -5,8 +5,11 @@
  * Purpose:    Provides standard functions.                                   *
  ******************************************************************************/
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "io/vga_terminal.h"
+#include "stdlib/stdio.h"
 
 static unsigned int digits(unsigned int x, int base) {
     if(x == 0)
@@ -91,4 +94,20 @@ void* memset(void* ptr, int value, size_t num) {
         ptr_u8[i] = value_u8;
     }
     return ptr;
+}
+
+void exit(int status) {
+    if(status != 0) {
+        VgaColorScheme err_color_scheme = {
+                .foreground = VGA_COLOR_LIGHT(VGA_COLOR_RED),
+                .background = VGA_COLOR_BLACK
+        };
+        VgaTerminalSwitchColorScheme(err_color_scheme);
+        printf("A fatal error has occured, exiting with error code %d\n",
+                status);
+    }
+    __asm volatile("cli");
+    while(true) {
+        __asm volatile("hlt");
+    }
 }

@@ -15,3 +15,4 @@ char* itoa(int value, char* str, int base);
 char* itoa_lc(int value, char* str, int base);
 void* memcpy(void* dest, void* src, size_t num);
 void* memset(void* ptr, int value, size_t num);
+void exit(int status);
