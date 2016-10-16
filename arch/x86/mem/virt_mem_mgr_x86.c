@@ -7,7 +7,10 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "arch/x86/dt/idt_x86.h"
+#include "io/vga_terminal.h"
 #include "mem/phys_mem_mgr.h"
+#include "stdlib/stdio.h"
 #include "stdlib/stdlib.h"
 
 typedef struct {
@@ -135,7 +138,27 @@ static inline void EnablePaging() {
     __asm volatile("mov %d0, %%cr0" : : "a" (cr0));
 }
 
+void X86PageFaultHandler(InterruptedCpuState cpu_state) {
+    VgaColorScheme err_color_scheme = {
+            .foreground = VGA_COLOR_LIGHT(VGA_COLOR_RED),
+            .background = VGA_COLOR_BLACK
+    };
+    VgaColorScheme link_color_scheme = {
+            .foreground = VGA_COLOR_LIGHT(VGA_COLOR_BLUE),
+            .background = VGA_COLOR_BLACK
+    };
+    VgaTerminalSwitchColorScheme(err_color_scheme);
+    printf(
+"A page fault (error code %d) has occured. It's a fatal error. Write down the\n"
+"error code and what you were doing when the error occured and submit an\n"
+"issue at ", cpu_state.error_code);
+    VgaTerminalSwitchColorScheme(link_color_scheme);
+    printf("https://github.com/velikiyv4/VV4OS/issues/\n");
+    exit(1);
+}
+
 void X86VirtMemMgrInit() {
+    X86RegisterIsrHandler(14, X86PageFaultHandler);
     kernel_page_directory = CreatePageDirectory();
     SwitchPageDirectory(kernel_page_directory);
     EnablePaging();
