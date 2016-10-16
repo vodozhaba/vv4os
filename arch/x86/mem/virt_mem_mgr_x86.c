@@ -123,7 +123,8 @@ static PageDirectoryEntry* CreatePageDirectory() {
     PageDirectoryEntry* directory = PhysAllocateFrame();
     memset(directory, 0, FRAME_SIZE);
     // Identity page the kernel so that it exists in all processes' memory
-    MapRange(NULL, NULL, 16384, true, false, false, directory);
+    MapRange((void*) 0x1000, (void*) 0x1000, 16383, true, false, false,
+            directory);
     return directory;
 }
 

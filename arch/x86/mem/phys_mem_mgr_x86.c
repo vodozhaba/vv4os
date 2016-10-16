@@ -35,6 +35,9 @@ void* X86PhysAllocateFrame() {
 }
 
 void X86PhysFreeFrame(void* ptr) {
+    if(ptr == NULL) {
+        return;
+    }
     uint32_t frame = (uint32_t) ptr / 4096;
     if(frame >= total_frames) {
         return;
