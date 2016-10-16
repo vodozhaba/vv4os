@@ -117,7 +117,3 @@ x86-debug: x86-all
 x86-release: CFLAGS += -O3 -DRELEASE
 x86-release: x86-all
 
-# Stuff for Code::Blocks
-
-cleanDebug: clean
-cleanRelease: clean
