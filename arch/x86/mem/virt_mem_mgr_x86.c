@@ -89,7 +89,8 @@ static void MapFrame(void* virtual, void* physical, bool writable, bool cached,
     VirtualAddr vaddr = (VirtualAddr) virtual;
     PageTableEntry* pte = GetPageTableEntryPtr(vaddr, directory);
     if(pte == NULL) {
-        pte = CreatePageTable(vaddr, directory);
+        PageTableEntry* table = CreatePageTable(vaddr, directory);
+        pte = &table[vaddr.page.table_entry];
     }
     pte->writable = writable;
     pte->user = user;
