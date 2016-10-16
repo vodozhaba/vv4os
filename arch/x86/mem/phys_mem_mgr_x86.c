@@ -9,7 +9,7 @@
 #include <stddef.h>
 #include "stdlib/stdlib.h"
 
-static uint32_t bitmap[4096];
+static uint32_t bitmap[32768];
 static uint32_t total_frames;
 
 void X86PhysMemMgrInit(size_t ram_size) {
