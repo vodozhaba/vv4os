@@ -36,10 +36,10 @@ MKDIRFLAGS=-p
 ASM=nasm
 ASMFLAGS=-felf32
 
-CC=/home/alexander/opt/cross/bin/i686-elf-gcc
+CC=/opt/cross/bin/i686-elf-gcc
 CFLAGS=-Wall -Wextra -Werror -ffreestanding -std=c11 -c -I.
 
-LINKER=/home/alexander/opt/cross/bin/i686-elf-gcc
+LINKER=/opt/cross/bin/i686-elf-gcc
 LFLAGS=-ffreestanding -nostdlib -lgcc -T linker.ld
 
 # Files.
