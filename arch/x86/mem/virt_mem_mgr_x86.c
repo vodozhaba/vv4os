@@ -90,6 +90,9 @@ static PageTableEntry* CreatePageTable(VirtualAddr vaddr,
 static void MapFrame(void* virtual, void* physical, bool writable, bool cached,
         bool user, PageDirectoryEntry* directory) {
     VirtualAddr vaddr = (VirtualAddr) virtual;
+    if(vaddr.page.directory_entry == 0 && vaddr.page.table_entry == 0) {
+        return;
+    }
     PageTableEntry* pte = GetPageTableEntryPtr(vaddr, directory);
     if(pte == NULL) {
         PageTableEntry* table = CreatePageTable(vaddr, directory);
