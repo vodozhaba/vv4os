@@ -141,6 +141,11 @@ static inline void EnablePaging() {
     __asm volatile("mov %d0, %%cr0" : : "a" (cr0));
 }
 
+__attribute__((unused)) static bool IsMapped(void* frame, PageDirectoryEntry*
+        directory) {
+    return GetPageTableEntryPtr((VirtualAddr) frame, directory)->present;
+}
+
 void X86PageFaultHandler(InterruptedCpuState cpu_state) {
     VgaColorScheme err_color_scheme = {
             .foreground = VGA_COLOR_LIGHT(VGA_COLOR_RED),
