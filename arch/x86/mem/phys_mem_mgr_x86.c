@@ -23,7 +23,7 @@ void X86PhysMemMgrInit(size_t ram_size) {
 }
 
 void* X86PhysAllocateFrame() {
-    for(uint32_t ix = 0; ix < 4096; ix++) {
+    for(uint32_t ix = 0; ix < 32768; ix++) {
         if(bitmap[ix] != 0xFFFFFFFF) {
             uint32_t bit;
             for(bit = 0; bitmap[ix] & (1 << bit); bit++);
