@@ -141,9 +141,27 @@ static inline void EnablePaging() {
     __asm volatile("mov %d0, %%cr0" : : "a" (cr0));
 }
 
-__attribute__((unused)) static bool IsMapped(void* frame, PageDirectoryEntry*
+static bool IsMapped(void* frame, PageDirectoryEntry*
         directory) {
     return GetPageTableEntryPtr((VirtualAddr) frame, directory)->present;
+}
+
+__attribute__((unused)) static void* FindContiguousFreeFrames(uint32_t frames,
+        PageDirectoryEntry* directory) {
+    uint32_t found = 0;
+    //   11111
+    //   FFFFF000
+    //  +00001000
+    // 1|00000000
+    // One gets truncated, frame = NULL
+    for(void* frame = (void*) 0x1000; frame != NULL; frame += 0x1000) {
+        if(IsMapped(frame, directory)) {
+            found = 0;
+        } else if(++found == frames) {
+            return frame - frames * 0x1000 + 0x1000;
+        }
+    }
+    return NULL;
 }
 
 void X86PageFaultHandler(InterruptedCpuState cpu_state) {
