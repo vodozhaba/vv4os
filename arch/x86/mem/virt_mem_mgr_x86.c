@@ -51,6 +51,7 @@ typedef union {
 } VirtualAddr;
 
 static PageDirectoryEntry* kernel_page_directory;
+static PageDirectoryEntry* current_page_directory;
 
 static PageTableEntry* GetPageTableEntryPtr(VirtualAddr vaddr,
         PageDirectoryEntry* directory) {
@@ -122,6 +123,7 @@ static void MapRange(void* virt_base, void* phys_base, uint32_t frames,
 }
 
 static inline void SwitchPageDirectory(PageDirectoryEntry* directory) {
+    current_page_directory = directory;
     __asm volatile("movl %d0, %%cr3" : : "a" (directory));
 }
 
@@ -143,13 +145,14 @@ static inline void EnablePaging() {
 
 static bool IsMapped(void* frame, PageDirectoryEntry*
         directory) {
-    return GetPageTableEntryPtr((VirtualAddr) frame, directory)->present;
+    PageTableEntry* pte = GetPageTableEntryPtr((VirtualAddr) frame, directory);
+    return pte != NULL && pte->present;
 }
 
-__attribute__((unused)) static void* FindContiguousFreeFrames(uint32_t frames,
+static void* FindContiguousFreeFrames(uint32_t frames,
         PageDirectoryEntry* directory) {
     uint32_t found = 0;
-    //   11111
+    //   1111
     //   FFFFF000
     //  +00001000
     // 1|00000000
@@ -188,4 +191,15 @@ void X86VirtMemMgrInit() {
     kernel_page_directory = CreatePageDirectory();
     SwitchPageDirectory(kernel_page_directory);
     EnablePaging();
+}
+
+void* X86AllocateContiguousVirtualFrames(uint32_t frames) {
+    void* base = FindContiguousFreeFrames(frames, current_page_directory);
+    for(uint32_t frame = 0; frame < frames; frame++) {
+        uint32_t offset = frame * 0x1000;
+        void* addr = base + offset;
+        MapFrame(addr, PhysAllocateFrame(), true, true, false,
+                current_page_directory);
+    }
+    return base;
 }

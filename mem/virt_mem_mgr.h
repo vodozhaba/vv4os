@@ -8,6 +8,7 @@
 #pragma once
 
 void X86VirtMemMgrInit();
+void* X86AllocateContiguousVirtualFrames(uint32_t frames);
 
 #if !defined(__X86__)
 #error "Cannot determine target architecture"
@@ -16,5 +17,11 @@ void X86VirtMemMgrInit();
 static inline void VirtMemMgrInit() {
 #if defined(__X86__)
     X86VirtMemMgrInit();
+#endif
+}
+
+static inline void* AllocateContiguousVirtualFrames(uint32_t frames) {
+#if defined(__X86__)
+    return X86AllocateContiguousVirtualFrames(frames);
 #endif
 }
