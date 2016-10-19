@@ -1,7 +1,7 @@
 ENTRY(_start)
 SECTIONS
 {
-    . = 32M;
+    . = 48M;
     .text BLOCK(4K) : ALIGN(4K)
     {
         *(.multiboot)

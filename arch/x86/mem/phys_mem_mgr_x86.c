@@ -17,7 +17,7 @@ void X86PhysMemMgrInit(size_t ram_size) {
     memset(bitmap, 0xFF, sizeof(bitmap)); // If there's a bug, let it better
                                           // not give free memory than give
                                           // some already allocated
-    for(uint32_t frame = 1; frame < 8192; frame++) {
+    for(uint32_t frame = 1; frame < 12288; frame++) {
         bitmap[frame / 32] &= ~(1 << (frame % 32));
     }
     for(uint32_t frame = 16384; frame < total_frames; frame++) {
