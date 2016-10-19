@@ -167,6 +167,12 @@ static void* FindContiguousFreeFrames(uint32_t frames,
     return NULL;
 }
 
+static void UnmapFrame(void* virtual, PageDirectoryEntry* directory) {
+    PageTableEntry* pte = GetPageTableEntryPtr((VirtualAddr) virtual,
+            directory);
+    pte->present = false;
+}
+
 void X86PageFaultHandler(InterruptedCpuState cpu_state) {
     VgaColorScheme err_color_scheme = {
             .foreground = VGA_COLOR_LIGHT(VGA_COLOR_RED),
@@ -202,4 +208,12 @@ void* X86AllocateContiguousVirtualFrames(uint32_t frames) {
                 current_page_directory);
     }
     return base;
+}
+
+void X86FreeContiguousVirtualFrames(void* base, uint32_t frames) {
+    for(uint32_t frame = 0; frame < frames; frame++) {
+        uint32_t offset = frame * 0x1000;
+        void* addr = base + offset;
+        UnmapFrame(addr, current_page_directory);
+    }
 }
