@@ -85,7 +85,7 @@ x86-all: $(KERNEL)
 
 # Installs the kernel to a disk image.
 
-install: $(KERNEL) $(DISK_IMG)
+install: all $(DISK_IMG)
 	$(MOUNT) -o loop,offset=$(IMG_OFFSET) $(DISK_IMG) $(IMG_MNTDIR)
 	$(MKDIR) $(MKDIRFLAGS) $(IMG_MNTDIR)/$(KERNEL_DEST_PATH)
 	$(CP) $(KERNEL) $(IMG_MNTDIR)/$(KERNEL_DEST_PATH)/$(KERNEL_DEST_NAME)
