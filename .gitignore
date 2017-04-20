@@ -1,0 +1,5 @@
+# Hidden files
+.*
+# Disk images
+*.img
+*.iso
