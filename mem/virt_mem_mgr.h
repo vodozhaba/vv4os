@@ -8,6 +8,7 @@
 #pragma once
 
 #include <stddef.h>
+#include "phys_mem_mgr.h"
 
 void X86VirtMemMgrInit();
 void* X86AllocateContiguousVirtualFrames(uint32_t frames);

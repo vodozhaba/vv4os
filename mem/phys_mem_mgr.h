@@ -5,6 +5,8 @@
  * Purpose:    Aliases physical memory managers for different architectures.  *
  ******************************************************************************/
 
+#pragma once
+
 #include <stddef.h>
 
 void X86PhysMemMgrInit(size_t ram_size);
