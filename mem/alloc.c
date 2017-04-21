@@ -10,8 +10,8 @@
 #include "mem/virt_mem_mgr.h"
 #include "stdlib/stdlib.h"
 
-#define BIG_SIGNATURE 0xB0A013F4
-#define SMALL_SIGNATURE 0xAFCBF74C
+#define BIG_SIGNATURE ((size_t) 0xB0A013F4)
+#define SMALL_SIGNATURE ((size_t) 0xAFCBF74C)
 
 // Here, I use the term 'block'.
 // Every block has a metadata frame with block entries.
@@ -31,7 +31,7 @@ typedef struct BlockEntry {
 
 #define ENTRIES_PER_BLOCK (FRAME_SIZE / sizeof(BlockEntry))
 
-BlockEntry* bitmap_list = NULL;
+static BlockEntry* bitmap_list = NULL;
 
 static void AllocateBlock() {
 	BlockEntry* metadata_frame = AllocateContiguousVirtualFrames(1);
@@ -60,7 +60,8 @@ static void* SmallMalloc(size_t size) {
 		size_t found = 0;
 		for(size_t i = 0; i < FRAME_SIZE; i++) {
 			bool allocated = (entry->bitmap[i / WORD_SIZE] >> (i % WORD_SIZE)) & 1;
-			if(allocated) found = 0;
+			if(allocated)
+				found = 0;
 			else {
 				found++;
 				if(found >= size) {
@@ -82,7 +83,8 @@ static void* SmallMalloc(size_t size) {
 static void* BigMalloc(size_t size) {
 	size_t frames = size / FRAME_SIZE + (size % FRAME_SIZE ? 1 : 0);
 	size_t* addr = AllocateContiguousVirtualFrames(frames);
-	if(addr == NULL) return NULL;
+	if(addr == NULL)
+		return NULL;
 	addr[0] = BIG_SIGNATURE;
 	addr[1] = frames;
 	return &addr[2];
@@ -96,11 +98,31 @@ void* malloc(size_t size) {
 		return SmallMalloc(size);
 }
 
+BlockEntry* FindEntryByFrame(void* data_frame) {
+	for(BlockEntry* entry = bitmap_list; entry != NULL; entry = entry->next) {
+		if(entry->data_frame == data_frame) return entry;
+	}
+	return NULL;
+}
+
+void SmallFree(void* addr) {
+	size_t addr_as_word = (size_t) addr;
+	void* data_frame = (void*)(addr_as_word / FRAME_SIZE * FRAME_SIZE);
+	BlockEntry* entry = FindEntryByFrame(data_frame);
+	size_t offset = addr_as_word % FRAME_SIZE - 2 * sizeof(size_t);
+	size_t size = ((size_t*) addr)[-1];
+	MarkInBitmap(entry, offset, size, false);
+}
+
 void BigFree(void* addr) {
-	size_t frames = *((size_t*) addr - 1);
+	size_t frames = ((size_t*) addr)[-1];
 	FreeContiguousVirtualFrames(addr - 2, frames);
 }
 
 void free(void* addr) {
-	BigFree(addr);
+	size_t signature = ((size_t*) addr)[-2];
+	if(signature == BIG_SIGNATURE)
+		BigFree(addr);
+	else if(signature == SMALL_SIGNATURE)
+		SmallFree(addr);
 }
