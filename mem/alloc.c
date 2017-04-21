@@ -126,3 +126,19 @@ void free(void* addr) {
 	else if(signature == SMALL_SIGNATURE)
 		SmallFree(addr);
 }
+
+void* calloc(size_t nmemb, size_t size) {
+	size *= nmemb;
+	void* addr = malloc(size);
+	memset(addr, 0, size);
+	return addr;
+}
+
+void* realloc(void* ptr, size_t size) {
+	void* ret = malloc(size);
+	if(ptr == NULL)
+		return ret;
+	memcpy(ret, ptr, size);
+	free(ptr);
+	return ret;
+}
