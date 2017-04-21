@@ -9,7 +9,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "io/vga_terminal.h"
-#include "mem/virt_mem_mgr.h"
 #include "stdlib/stdio.h"
 
 static unsigned int digits(unsigned int x, int base) {
@@ -95,22 +94,6 @@ void* memset(void* ptr, int value, size_t num) {
         ptr_u8[i] = value_u8;
     }
     return ptr;
-}
-
-void* malloc(size_t size) {
-	// TODO: we can waste even more RAM!
-	// P.S. For every single piece of memory a whole frame is allocated. Reuse old frames.
-	size_t full_size = size + sizeof(size_t); // including metadata
-	size_t frames = full_size / FRAME_SIZE + (full_size % FRAME_SIZE ? 1 : 0);
-	void* addr = AllocateContiguousVirtualFrames(frames);
-	if(addr == NULL) return NULL;
-	*((size_t*) addr) = frames;
-	return addr + sizeof(size_t);
-}
-
-void free(void* addr) {
-	size_t frames = *((size_t*) addr - 1);
-	FreeContiguousVirtualFrames(addr, frames);
 }
 
 void exit(int status) {
