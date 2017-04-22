@@ -19,13 +19,13 @@
 // Every block entry describes a data frame.
 // In addition, there are two words (size_t, not 16-bit words) before every allocated item.
 
+// Let's make a little assumption that a byte is 8 bits. I'm tired of this portability.
 #define WORD_SIZE (sizeof(size_t) * 8)
 #define WORDS_PER_BITMAP (FRAME_SIZE / WORD_SIZE)
 
 typedef struct BlockEntry {
 	struct BlockEntry* next;
 	void* data_frame;
-	// Let's make a little assumption that a byte is 8 bits. I'm tired of this portability.
 	size_t bitmap[WORDS_PER_BITMAP];
 } BlockEntry;
 
@@ -91,18 +91,32 @@ static void* BigMalloc(size_t size) {
 }
 
 void* malloc(size_t size) {
-	size += 2; // including metadata
+	size += 2 * sizeof(size_t); // including metadata
 	if(size >= FRAME_SIZE) {
 		return BigMalloc(size);
 	} else
 		return SmallMalloc(size);
 }
 
-BlockEntry* FindEntryByFrame(void* data_frame) {
+static BlockEntry* FindEntryByFrame(void* data_frame) {
 	for(BlockEntry* entry = bitmap_list; entry != NULL; entry = entry->next) {
 		if(entry->data_frame == data_frame) return entry;
 	}
 	return NULL;
+}
+
+static size_t GetSignature(void* addr) {
+	return ((size_t*) addr)[-2];
+}
+
+static size_t GetSize(void* addr) {
+	size_t signature = GetSignature(addr);
+	if(signature == BIG_SIGNATURE)
+		return ((size_t*) addr)[-1] * FRAME_SIZE - 2 * sizeof(size_t);
+	else if(signature == SMALL_SIGNATURE)
+		return ((size_t*) addr)[-1] - 2 * sizeof(size_t);
+	else
+		return 0;
 }
 
 void SmallFree(void* addr) {
@@ -110,12 +124,12 @@ void SmallFree(void* addr) {
 	void* data_frame = (void*)(addr_as_word / FRAME_SIZE * FRAME_SIZE);
 	BlockEntry* entry = FindEntryByFrame(data_frame);
 	size_t offset = addr_as_word % FRAME_SIZE - 2 * sizeof(size_t);
-	size_t size = ((size_t*) addr)[-1];
+	size_t size = GetSize(addr);
 	MarkInBitmap(entry, offset, size, false);
 }
 
 void BigFree(void* addr) {
-	size_t frames = ((size_t*) addr)[-1];
+	size_t frames = GetSize(addr);
 	FreeContiguousVirtualFrames(addr - 2, frames);
 }
 
@@ -138,7 +152,8 @@ void* realloc(void* ptr, size_t size) {
 	void* ret = malloc(size);
 	if(ptr == NULL)
 		return ret;
-	memcpy(ret, ptr, size);
+	size_t old_size = GetSize(ptr);
+	memcpy(ret, ptr, old_size > size ? size : old_size);
 	free(ptr);
 	return ret;
 }
