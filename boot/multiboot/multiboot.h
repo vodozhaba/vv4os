@@ -74,3 +74,10 @@ typedef struct {
     uint16_t cseg_16_len;
     uint16_t dseg_len;
 } __attribute__((packed)) MultibootApmTable;
+
+typedef struct {
+	uint32_t mod_start;
+	uint32_t mod_end;
+	uint32_t string;
+	uint32_t reserved;
+} __attribute__((packed)) MultibootModuleStructure;

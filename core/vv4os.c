@@ -13,10 +13,28 @@
 #include "mem/phys_mem_mgr.h"
 #include "mem/virt_mem_mgr.h"
 #include "stdlib/stdio.h"
+#include "stdlib/stdlib.h"
+#include "stdlib/string.h"
+
+#define MAX_CONF_SIZE 4096
+#define CONF_SIGNATURE "notjunk"
 
 size_t available_ram;
 
-static void InitAll() {
+char config[MAX_CONF_SIZE];
+
+bool ParseConfig() {
+	config[strlen(CONF_SIGNATURE)] = '\0';
+	return strcmp(config, CONF_SIGNATURE) == 0;
+}
+
+void main(MultibootInformation* mi) {
+    available_ram = (mi->mem_upper + 1024) << 10;
+    if(mi->mods_count != 1)
+    	return;
+    MultibootModuleStructure conf = ((MultibootModuleStructure*) mi->mods_addr)[0];
+    size_t conf_size = conf.mod_end - conf.mod_start;
+    memcpy(config, (void*) conf.mod_start, conf_size > MAX_CONF_SIZE ? MAX_CONF_SIZE : conf_size);
     VgaTerminalInit();
     printf("Initialized VGA terminal\n");
     DescTablesInit();
@@ -26,10 +44,12 @@ static void InitAll() {
     printf("Initialized physical memory manager\n");
     VirtMemMgrInit();
     printf("Initialized virtual memory manager\n");
-}
-
-void main(MultibootInformation* mi) {
-    available_ram = (mi->mem_upper + 1024) << 10;
-    InitAll();
+    if(ParseConfig())
+    	printf("Parsed the boot config successfully\n");
+    else {
+    	VgaTerminalSwitchColorScheme(err_color_scheme);
+    	printf("Cannot parse the boot config. Is there a valid /sys/vv4os/boot.cfg?\n");
+    	exit(1);
+    }
     while(true);
 }

@@ -30,6 +30,15 @@ typedef struct {
     VgaColorScheme color_scheme;
 } __attribute__((packed)) VgaEntry;
 
+static const VgaColorScheme err_color_scheme = {
+        .foreground = VGA_COLOR_LIGHT(VGA_COLOR_RED),
+        .background = VGA_COLOR_BLACK
+};
+static const VgaColorScheme link_color_scheme = {
+        .foreground = VGA_COLOR_LIGHT(VGA_COLOR_BLUE),
+        .background = VGA_COLOR_BLACK
+};
+
 int VgaTerminalInit();
 int VgaTerminalPut(char c);
 VgaColorScheme VgaTerminalGetColorScheme();

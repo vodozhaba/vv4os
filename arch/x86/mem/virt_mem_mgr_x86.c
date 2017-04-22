@@ -174,14 +174,6 @@ static void UnmapFrame(void* virtual, PageDirectoryEntry* directory) {
 }
 
 void X86PageFaultHandler(InterruptedCpuState cpu_state) {
-    VgaColorScheme err_color_scheme = {
-            .foreground = VGA_COLOR_LIGHT(VGA_COLOR_RED),
-            .background = VGA_COLOR_BLACK
-    };
-    VgaColorScheme link_color_scheme = {
-            .foreground = VGA_COLOR_LIGHT(VGA_COLOR_BLUE),
-            .background = VGA_COLOR_BLACK
-    };
     VgaTerminalSwitchColorScheme(err_color_scheme);
     printf(
 "A page fault (error code %d) has occured. It's a fatal error. Please, write down\n"
