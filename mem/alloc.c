@@ -119,7 +119,7 @@ static size_t GetSize(void* addr) {
 		return 0;
 }
 
-void SmallFree(void* addr) {
+static void SmallFree(void* addr) {
 	size_t addr_as_word = (size_t) addr;
 	void* data_frame = (void*)(addr_as_word / FRAME_SIZE * FRAME_SIZE);
 	BlockEntry* entry = FindEntryByFrame(data_frame);
@@ -128,7 +128,7 @@ void SmallFree(void* addr) {
 	MarkInBitmap(entry, offset, size, false);
 }
 
-void BigFree(void* addr) {
+static void BigFree(void* addr) {
 	size_t frames = GetSize(addr);
 	FreeContiguousVirtualFrames(addr - 2, frames);
 }
