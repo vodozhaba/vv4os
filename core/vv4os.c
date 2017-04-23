@@ -9,6 +9,7 @@
 #include <stddef.h>
 #include "boot/multiboot/multiboot.h"
 #include "dt/desc_tables.h"
+#include "io/pci.h"
 #include "io/vga_terminal.h"
 #include "mem/phys_mem_mgr.h"
 #include "mem/virt_mem_mgr.h"
@@ -44,6 +45,8 @@ void main(MultibootInformation* mi) {
     printf("Initialized physical memory manager\n");
     VirtMemMgrInit();
     printf("Initialized virtual memory manager\n");
+    PciInit();
+    printf("Initialized PCI driver\n");
     if(ParseConfig())
     	printf("Parsed the boot config successfully\n");
     else {

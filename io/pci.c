@@ -7,10 +7,80 @@
 
 #include "pci.h"
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #include "io/ports.h"
+#include "stdlib/stdlib.h"
 
-uint16_t PciConfigReadWord(uint8_t bus, uint8_t device, uint8_t function, uint8_t offset) {
+#define PCI_CONFIG_ADDRESS_PORT 0xCF8
+#define PCI_CONFIG_DATA_PORT 0xCFC
+
+#define PCI_CONFIG_OFFSET_VENDOR_ID 0x00
+#define PCI_CONFIG_OFFSET_SUBCLASS 0x0A
+#define PCI_CONFIG_OFFSET_CLASS_CODE 0x0B
+#define PCI_CONFIG_OFFSET_HEADER_TYPE 0x0E
+#define PCI_CONFIG_OFFSET_SECONDARY_BUS_NUMBER 0x19
+
+#define PCI_CONFIG_CLASS_CODE_BRIDGE 0x06
+
+#define PCI_CONFIG_SUBCLASS_PCI_TO_PCI_BRIDGE 0x04
+
+typedef union {
+	struct {
+		uint8_t zero : 2;
+		uint8_t reg : 6;
+		uint8_t function : 3;
+		uint8_t device : 5;
+		uint8_t bus;
+		uint8_t reserved : 7;
+		bool enable : 1;
+	} __attribute__((packed)) as_struct;
+	uint32_t as_u32;
+} PciConfigAddress;
+
+typedef struct {
+	uint8_t header_type : 7;
+	bool mf : 1;
+} __attribute__((packed)) PciConfigHeaderType;
+
+typedef struct PciDevice {
+	uint16_t vendor_id;
+	uint16_t device_id;
+	uint16_t command;
+	uint16_t status;
+	uint8_t revision_id;
+	uint8_t prog_if;
+	uint8_t subclass;
+	uint8_t class_code;
+	uint8_t cache_line_size;
+	uint8_t latency_timer;
+	uint8_t header_type;
+	uint8_t bist;
+	uint32_t bar0;
+	uint32_t bar1;
+	uint32_t bar2;
+	uint32_t bar3;
+	uint32_t bar4;
+	uint32_t bar5;
+	uint32_t cardbus_cis_pointer;
+	uint8_t subsystem_vendor_id;
+	uint8_t sybsystem_id;
+	uint32_t expansion_rom_base_address;
+	uint8_t capabilities_pointer;
+	uint64_t reserved : 56;
+	uint8_t interrupt_line;
+	uint8_t interrupt_pin;
+	uint8_t min_grant;
+	uint8_t max_latency;
+	uint8_t bus;
+	uint8_t device : 5;
+	uint8_t function : 3;
+	struct PciDevice* next;
+} __attribute__((packed)) PciDevice;
+
+static PciDevice* devices_list = NULL;
+
+static uint32_t PciConfigRead32(uint8_t bus, uint8_t device, uint8_t function, uint8_t offset) {
 	PciConfigAddress addr;
 	addr.as_struct.zero = 0;
 	addr.as_struct.reg = offset >> 2;
@@ -20,8 +90,80 @@ uint16_t PciConfigReadWord(uint8_t bus, uint8_t device, uint8_t function, uint8_
 	addr.as_struct.reserved = 0;
 	addr.as_struct.enable = true;
 	PortWrite32(PCI_CONFIG_ADDRESS_PORT, addr.as_u32);
-	if(offset % 32 == 0)
-		return (uint16_t) PortRead32(PCI_CONFIG_DATA_PORT);
-	else
-		return (uint16_t)(PortRead32(PCI_CONFIG_DATA_PORT) >> 16);
+	return PortRead32(PCI_CONFIG_DATA_PORT);
+}
+
+static uint8_t PciConfigRead8(uint8_t bus, uint8_t device, uint8_t function, uint8_t offset) {
+	return(uint8_t)(PciConfigRead32(bus, device, function, offset) >> (offset % 4) * 8);
+}
+
+static uint16_t PciConfigRead16(uint8_t bus, uint8_t device, uint8_t function, uint8_t offset) {
+	return(uint16_t)(PciConfigRead32(bus, device, function, offset) >> (offset % 4) * 8);
+}
+
+static PciConfigHeaderType PciReadHeaderType(uint8_t bus, uint8_t device, uint8_t function) {
+	PciConfigHeaderType ret;
+	uint8_t byte = PciConfigRead8(bus, device, function, PCI_CONFIG_OFFSET_HEADER_TYPE);
+	ret.mf = byte >> 7;
+	ret.header_type = byte;
+	return ret;
+}
+
+static void PciProbeBus(uint8_t bus);
+
+static void PciAddDevice(uint8_t bus, uint8_t device, uint8_t function) {
+	PciDevice* pci_device = malloc(sizeof(*pci_device));
+	uint32_t* as_arr = (uint32_t*) pci_device;
+	for(size_t i = 0; i <= 0x3C; i += 4) {
+		as_arr[i] = PciConfigRead32(bus, device, function, i);
+	}
+	pci_device->bus = bus;
+	pci_device->device = device;
+	pci_device->function = function;
+	pci_device = devices_list;
+	devices_list = pci_device;
+}
+
+static void PciProbeFunction(uint8_t bus, uint8_t device, uint8_t function) {
+	uint8_t class = PciConfigRead8(bus, device, function, PCI_CONFIG_OFFSET_CLASS_CODE);
+	uint8_t subclass = PciConfigRead8(bus, device, function, PCI_CONFIG_OFFSET_SUBCLASS);
+	if(class == PCI_CONFIG_CLASS_CODE_BRIDGE && subclass == PCI_CONFIG_SUBCLASS_PCI_TO_PCI_BRIDGE) {
+		uint8_t secondary_bus = PciConfigRead8(bus, device, function, PCI_CONFIG_OFFSET_SECONDARY_BUS_NUMBER);
+		PciProbeBus(secondary_bus);
+		return;
+	}
+	PciAddDevice(bus, device, function);
+}
+
+static void PciProbeDevice(uint8_t bus, uint8_t device) {
+	if(PciConfigRead16(bus, device, 0, PCI_CONFIG_OFFSET_VENDOR_ID) == 0xFFFF)
+		return;
+	PciProbeFunction(bus, device, 0);
+	PciConfigHeaderType ht = PciReadHeaderType(bus, device, 0);
+	if(!ht.mf)
+		return;
+
+	for(uint8_t function = 1; function < 8; function++) {
+		if(PciConfigRead16(bus, device, function, PCI_CONFIG_OFFSET_VENDOR_ID) != 0xFFFF)
+			PciProbeFunction(bus, device, function);
+	}
+}
+
+static void PciProbeBus(uint8_t bus) {
+	for(uint8_t device = 0; device < 32; device++) {
+		PciProbeDevice(bus, device);
+	}
+}
+
+void PciInit() {
+	PciConfigHeaderType ht = PciReadHeaderType(0, 0, 0);
+	PciProbeBus(0);
+	if(!ht.mf)
+		return;
+	for(uint8_t function = 0; function < 8; function++) {
+		uint16_t vendor_id = PciConfigRead16(0, 0, function, PCI_CONFIG_OFFSET_VENDOR_ID);
+		if(vendor_id == 0xFFFF)
+			break;
+		PciProbeBus(function);
+	}
 }
