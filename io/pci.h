@@ -29,8 +29,8 @@ typedef struct PciDevice {
 	uint32_t bar4;
 	uint32_t bar5;
 	uint32_t cardbus_cis_pointer;
-	uint8_t subsystem_vendor_id;
-	uint8_t sybsystem_id;
+	uint16_t subsystem_vendor_id;
+	uint16_t sybsystem_id;
 	uint32_t expansion_rom_base_address;
 	uint8_t capabilities_pointer;
 	uint64_t reserved : 56;
