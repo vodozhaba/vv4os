@@ -31,13 +31,16 @@ bool ParseConfig() {
 
 void main(MultibootInformation* mi) {
     available_ram = (mi->mem_upper + 1024) << 10;
-    if(mi->mods_count != 1)
-    	return;
+    VgaTerminalInit();
+    printf("Initialized VGA terminal\n");
+    if(mi->mods_count != 1) {
+    	VgaTerminalSwitchColorScheme(err_color_scheme);
+    	printf("Something's wrong with the boot modules. Aborting");
+    	exit(1);
+    }
     MultibootModuleStructure conf = ((MultibootModuleStructure*) mi->mods_addr)[0];
     size_t conf_size = conf.mod_end - conf.mod_start;
     memcpy(config, (void*) conf.mod_start, conf_size > MAX_CONF_SIZE ? MAX_CONF_SIZE : conf_size);
-    VgaTerminalInit();
-    printf("Initialized VGA terminal\n");
     DescTablesInit();
     printf("Initialized processor descriptor tables\n");
     printf("Detected %dMiB of RAM\n", available_ram / 1048576);
