@@ -9,6 +9,7 @@
 #include <stddef.h>
 #include "boot/multiboot/multiboot.h"
 #include "dt/desc_tables.h"
+#include "io/disk/disk.h"
 #include "io/pci.h"
 #include "io/vga_terminal.h"
 #include "mem/phys_mem_mgr.h"
@@ -57,5 +58,6 @@ void main(MultibootInformation* mi) {
     	printf("Cannot parse the boot config. Is there a valid /sys/vv4os/boot.cfg?\n");
     	exit(1);
     }
+    DiskSubsystemInit();
     while(true);
 }
