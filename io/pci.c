@@ -108,10 +108,6 @@ static void PciProbeBus(uint8_t bus);
 static void PciAddDevice(uint8_t bus, uint8_t device, uint8_t function) {
 	PciConfigWrite8(bus, device, function, PCI_CONFIG_REGULAR_DEVICE_OFFSET_INTERRUPT_LINE, PCI_IRQ);
 	PciDevice* pci_device = malloc(sizeof(*pci_device));
-	uint32_t* as_arr = (uint32_t*) pci_device;
-	for(size_t i = 0; i < 16; i++) {
-		as_arr[i] = PciConfigRead32(bus, device, function, i * 4);
-	}
 	pci_device->bus = bus;
 	pci_device->device = device;
 	pci_device->function = function;
