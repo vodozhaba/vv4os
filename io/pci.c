@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "arch/x86/dt/idt_x86.h"
 #include "io/ports.h"
 #include "stdlib/stdlib.h"
 
@@ -25,6 +26,8 @@
 #define PCI_CONFIG_CLASS_CODE_BRIDGE 0x06
 
 #define PCI_CONFIG_SUBCLASS_PCI_TO_PCI_BRIDGE 0x04
+
+#define PCI_IRQ 10
 
 typedef union {
 	struct {
@@ -105,7 +108,7 @@ static PciConfigHeaderType PciReadHeaderType(uint8_t bus, uint8_t device, uint8_
 static void PciProbeBus(uint8_t bus);
 
 static void PciAddDevice(uint8_t bus, uint8_t device, uint8_t function) {
-	PciConfigWrite8(bus, device, function, PCI_CONFIG_OFFSET_INTERRUPT_LINE, 10);
+	PciConfigWrite8(bus, device, function, PCI_CONFIG_OFFSET_INTERRUPT_LINE, PCI_IRQ);
 	PciDevice* pci_device = malloc(sizeof(*pci_device));
 	uint32_t* as_arr = (uint32_t*) pci_device;
 	for(size_t i = 0; i < 16; i++) {
@@ -149,15 +152,22 @@ static void PciProbeBus(uint8_t bus) {
 	}
 }
 
+static void PciIrqHandler() {
+
+}
+
 void PciInit() {
 	PciConfigHeaderType ht = PciReadHeaderType(0, 0, 0);
 	PciProbeBus(0);
-	if(!ht.mf)
-		return;
-	for(uint8_t function = 0; function < 8; function++) {
-		uint16_t vendor_id = PciConfigRead16(0, 0, function, PCI_CONFIG_OFFSET_VENDOR_ID);
-		if(vendor_id == 0xFFFF)
-			break;
-		PciProbeBus(function);
+	if(ht.mf) {
+		for(uint8_t function = 0; function < 8; function++) {
+			uint16_t vendor_id = PciConfigRead16(0, 0, function, PCI_CONFIG_OFFSET_VENDOR_ID);
+			if(vendor_id == 0xFFFF)
+				break;
+			PciProbeBus(function);
+		}
 	}
+#if defined(__X86__)
+	X86RegisterIrqHandler(IRQ(PCI_IRQ), PciIrqHandler);
+#endif
 }
