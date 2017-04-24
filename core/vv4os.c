@@ -59,5 +59,6 @@ void main(MultibootInformation* mi) {
     	exit(1);
     }
     DiskSubsystemInit();
+    printf("Initialized the disk subsystem\n");
     while(true);
 }
