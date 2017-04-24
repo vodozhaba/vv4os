@@ -1,5 +1,5 @@
 ; File: boot/boot.asm
-; Author: velikiyv4
+; Author: vodozhaba
 ; Created on: Aug 20, 2016
 ; Purpose: Sets up stack and calls main().
 

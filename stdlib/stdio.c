@@ -1,6 +1,6 @@
 /******************************************************************************
  * File:       /vv4os/stdlib/stdio.c                                          *
- * Author:     velikiyv4                                                      *
+ * Author:     vodozhaba                                                      *
  * Created on: Aug 21, 2016                                                   *
  * Purpose:    Provides standard I/O functions.                               *
  ******************************************************************************/

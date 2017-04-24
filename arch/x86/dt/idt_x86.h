@@ -1,6 +1,6 @@
 /******************************************************************************
  * File:       /vv4os/arch/x86/dt/idt_x86.h                                   *
- * Author:     velikiyv4                                                      *
+ * Author:     vodozhaba                                                      *
  * Created on: Oct 9, 2016                                                    *
  * Purpose:    Allows working with x86 Interrupt Descriptor Table.            *
  ******************************************************************************/

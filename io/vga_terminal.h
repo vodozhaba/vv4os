@@ -1,6 +1,6 @@
 /******************************************************************************
  * File:       /vv4os/io/vga_terminal.h                                       *
- * Author:     velikiyv4                                                      *
+ * Author:     vodozhaba                                                      *
  * Created on: Aug 20, 2016                                                   *
  * Purpose:    Provides an interface for VGA 80x25 terminal.                  *
  ******************************************************************************/

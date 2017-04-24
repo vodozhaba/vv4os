@@ -1,6 +1,6 @@
 /******************************************************************************
  * File:       /vv4os/arch/x86/mem/phys_mem_mgr_x86.c                         *
- * Author:     velikiyv4                                                      *
+ * Author:     vodozhaba                                                      *
  * Created on: Sep 30, 2016                                                   *
  * Purpose:    Manages physical memory, allows (de)allocating it on x86.      *
  ******************************************************************************/

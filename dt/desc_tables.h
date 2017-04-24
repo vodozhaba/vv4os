@@ -1,6 +1,6 @@
 /******************************************************************************
  * File:       /vv4os/dt/desc_tables.h                                        *
- * Author:     velikiyv4                                                      *
+ * Author:     vodozhaba                                                      *
  * Created on: Oct 9, 2016                                                    *
  * Purpose:    Aliases descriptor table managers for different architectures. *
  ******************************************************************************/

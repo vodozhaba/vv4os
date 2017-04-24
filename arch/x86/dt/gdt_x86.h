@@ -1,6 +1,6 @@
 /******************************************************************************
  * File:       /vv4os/arch/x86/dt/gdt.h                                       *
- * Author:     velikiyv4                                                      *
+ * Author:     vodozhaba                                                      *
  * Created on: Oct 1, 2016                                                    *
  * Purpose:    Allows working with x86 Global Descriptor Table.               *
  ******************************************************************************/

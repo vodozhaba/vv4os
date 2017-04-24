@@ -1,6 +1,6 @@
 /******************************************************************************
  * File:       /vv4os/io/vga_terminal.c                                       *
- * Author:     velikiyv4                                                      *
+ * Author:     vodozhaba                                                      *
  * Created on: Aug 20, 2016                                                   *
  * Purpose:    Module for VGA 80x25 terminal.                                 *
  ******************************************************************************/

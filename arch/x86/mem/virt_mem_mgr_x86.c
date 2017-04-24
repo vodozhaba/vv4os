@@ -1,6 +1,6 @@
 /******************************************************************************
  * File:       /vv4os/arch/x86/mem/virt_mem_mgr_x86.c                         *
- * Author:     velikiyv4                                                      *
+ * Author:     vodozhaba                                                      *
  * Created on: Oct 11, 2016                                                   *
  * Purpose:    Translates virtual memory to physical and (de)allocates it.    *
  ******************************************************************************/
