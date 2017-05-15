@@ -73,7 +73,7 @@ KERNEL_DEST_NAME=kernel.elf
 # These targets are executed whenever they are called
 # even if there are ready files with their names.
 
-.PHONY: all Debug cleanDebug Release cleanRelease $(KERNEL) install clean
+.PHONY: all x86-all x86-release x86-debug install clean
 
 # Build everything (currently only the kernel).
 # You can simply call make if you want to do it.
