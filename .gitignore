@@ -3,3 +3,5 @@
 # Disk images
 *.img
 *.iso
+# Logs
+*.log
