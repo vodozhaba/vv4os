@@ -63,8 +63,6 @@ KERNEL_DEST_PATH=/sys/vv4os/
 KERNEL_DEST_NAME=kernel.elf
 
 # Here comes the build system code.
-# Do not modify it unless your IQ level is higher than 110.
-# Mine is 122 so I'm allowed to do it.
 
 # It suppresses Makefile built-in rule about .o suffixes.
 
