@@ -22,7 +22,13 @@
 #define MODEM_STATUS (PORT(6))
 #define SCRATCH (PORT(7))
 
-#define DATA_BITS(n) ((n) - 4)
+#define DATA_BITS(n) ((n) - 5)
+
+#define PARITY_NONE 0x00
+#define PARITY_ODD 0x01
+#define PARITY_EVEN 0x03
+#define PARITY_MARK 0x05
+#define PARITY_SPACE 0x07
 
 typedef union {
 	struct {
@@ -61,9 +67,9 @@ void Rs232Init(int freq) {
 	SetDivisor(freq);
 	// 8N1 mode
 	LineControlReg lcr;
-	lcr.as_struct.data_bits = 0x03; // 8 bits
+	lcr.as_struct.data_bits = DATA_BITS(8); // 8 bits
 	lcr.as_struct.more_stop_bits = false;
-	lcr.as_struct.parity = 0x00;
+	lcr.as_struct.parity = PARITY_NONE;
 	lcr.as_struct.unused = 0x00;
 	lcr.as_struct.dlab = false;
 	PortWrite8(LINE_CONTROL, lcr.as_byte);
