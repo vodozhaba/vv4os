@@ -54,7 +54,7 @@ align 4
     dd DEPTH
 
 section .bootstrap_stack, nobits
-align 4
+align 16
 	stack_bottom:
 		resb 16384 ; 16K of stack seem enough
 	stack_top:
