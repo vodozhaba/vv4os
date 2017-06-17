@@ -56,12 +56,18 @@ static void MarkInBitmap(BlockEntry* entry, size_t offset, size_t size, bool val
 }
 
 static void* SmallMalloc(size_t size) {
+	size_t alignment = sizeof(size_t);
 	for(BlockEntry* entry = bitmap_list; entry != NULL; entry = entry->next) {
 		size_t found = 0;
 		for(size_t i = 0; i < FRAME_SIZE; i++) {
 			bool allocated = (entry->bitmap[i / WORD_SIZE] >> (i % WORD_SIZE)) & 1;
-			if(allocated)
+			if(allocated) {
+				// align
+				if(i % alignment == alignment - 1)
+					break;
+				i = (i / alignment + 1) * alignment - 1;
 				found = 0;
+			}
 			else {
 				found++;
 				if(found >= size) {
