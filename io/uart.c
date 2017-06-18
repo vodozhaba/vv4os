@@ -114,3 +114,11 @@ char UartRead() {
 	} while(!lsr.as_struct.data_avail);
 	return PortRead8(DATA);
 }
+
+void UartSend(char c) {
+	LineStatusReg lsr;
+	do {
+		lsr.as_byte = PortRead8(LINE_STATUS);
+	} while(!lsr.as_struct.thr_empty);
+	PortWrite8(DATA, c);
+}
