@@ -5,4 +5,4 @@
  * Purpose:    Allows working with serial ports.                              *
  ******************************************************************************/
 
-void Rs232Init(int freq);
+void UartInit(int freq);

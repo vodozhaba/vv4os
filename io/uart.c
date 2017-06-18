@@ -45,12 +45,36 @@ typedef union {
 	struct {
 		bool data_avail : 1;
 		bool tx_empty : 1;
-		bool break_or_error : 1;
-		bool status_change : 1;
-		uint8_t unused : 4;
+		bool rx_status_change : 1;
+		bool modem_status_change : 1;
+		bool sleep_mode : 1;
+		bool low_power_mode : 1;
+		uint8_t unused : 2;
 	} __attribute__((packed)) as_struct;
 	uint8_t as_byte;
 } IntEnableReg;
+
+typedef union {
+	struct {
+		bool data_avail : 1;
+		bool overrun_error : 1;
+		bool parity_error : 1;
+		bool framing_error : 1;
+		bool break_signal_received : 1;
+		bool thr_empty : 1;
+		bool thr_empty_and_line_idle : 1;
+		bool err_data_in_fifo : 1;
+	} __attribute__((packed)) as_struct;
+	uint8_t as_byte;
+} LineStatusReg;
+
+typedef union {
+	struct {
+		bool interrupt_not_pending;
+		uint8_t status : 3;
+	} __attribute__((unused)) as_struct;
+	uint8_t as_byte;
+} IntIdentReg;
 
 static void SetDivisor(int freq) {
 	uint16_t divisor = BASE_FREQ / freq;
@@ -63,7 +87,7 @@ static void SetDivisor(int freq) {
 	PortWrite8(LINE_CONTROL, lcr.as_byte);
 }
 
-void Rs232Init(int freq) {
+void UartInit(int freq) {
 	SetDivisor(freq);
 	// 8N1 mode
 	LineControlReg lcr;
@@ -77,8 +101,16 @@ void Rs232Init(int freq) {
 	IntEnableReg ier;
 	ier.as_struct.data_avail = true;
 	ier.as_struct.tx_empty = true;
-	ier.as_struct.break_or_error = false;
-	ier.as_struct.status_change = true;
+	ier.as_struct.rx_status_change = false;
+	ier.as_struct.modem_status_change = true;
 	ier.as_struct.unused = 0;
 	PortWrite8(INT_ENABLE, ier.as_byte);
+}
+
+char UartRead() {
+	LineStatusReg lsr;
+	do {
+		lsr.as_byte = PortRead8(LINE_STATUS);
+	} while(!lsr.as_struct.data_avail);
+	return PortRead8(DATA);
 }
