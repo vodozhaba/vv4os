@@ -32,7 +32,9 @@ bool ParseConfig() {
 }
 
 void main(MultibootInformation* mi) {
-    available_ram = (mi->mem_upper + 1024) << 10;
+    MultibootModuleStructure conf = ((MultibootModuleStructure*) mi->mods_addr)[0];
+    size_t conf_size = conf.mod_end - conf.mod_start;
+    memcpy(config, (void*) conf.mod_start, conf_size > MAX_CONF_SIZE ? MAX_CONF_SIZE : conf_size);
     VgaTerminalInit();
     printf("Initialized VGA terminal\n");
     if(mi->mods_count != 1) {
@@ -40,11 +42,11 @@ void main(MultibootInformation* mi) {
     	printf("Something's wrong with the boot modules. Aborting");
     	exit(1);
     }
-    MultibootModuleStructure conf = ((MultibootModuleStructure*) mi->mods_addr)[0];
-    size_t conf_size = conf.mod_end - conf.mod_start;
-    memcpy(config, (void*) conf.mod_start, conf_size > MAX_CONF_SIZE ? MAX_CONF_SIZE : conf_size);
     DescTablesInit();
     printf("Initialized processor descriptor tables\n");
+    UartInit(UART_DEFAULT_FREQ);
+    printf("Initialized UART (baudrate %d)\n", UART_DEFAULT_FREQ);
+    available_ram = (mi->mem_upper + 1024) << 10;
     printf("Detected %dMiB of RAM\n", available_ram / 1048576);
     PhysMemMgrInit(available_ram);
     printf("Initialized physical memory manager\n");
@@ -61,7 +63,5 @@ void main(MultibootInformation* mi) {
     }
     DiskSubsystemInit();
     printf("Initialized the disk subsystem\n");
-    UartInit(UART_DEFAULT_FREQ);
-    printf("Initialized UART (baudrate %d)\n", UART_DEFAULT_FREQ);
     while(true);
 }
