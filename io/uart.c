@@ -1,5 +1,5 @@
 /******************************************************************************
- * File:       /vv4os/io/rs232.c                                              *
+ * File:       /vv4os/io/uart.c                                              *
  * Author:     vodozhaba                                                      *
  * Created on: Jun 16, 2017                                                   *
  * Purpose:    Allows working with serial ports.                              *
@@ -68,14 +68,6 @@ typedef union {
 	uint8_t as_byte;
 } LineStatusReg;
 
-typedef union {
-	struct {
-		bool interrupt_not_pending;
-		uint8_t status : 3;
-	} __attribute__((unused)) as_struct;
-	uint8_t as_byte;
-} IntIdentReg;
-
 static void SetDivisor(int freq) {
 	uint16_t divisor = BASE_FREQ / freq;
 	LineControlReg lcr;
@@ -91,13 +83,13 @@ void UartInit(int freq) {
 	SetDivisor(freq);
 	// 8N1 mode
 	LineControlReg lcr;
-	lcr.as_struct.data_bits = DATA_BITS(8); // 8 bits
+	lcr.as_struct.data_bits = DATA_BITS(8);
 	lcr.as_struct.more_stop_bits = false;
 	lcr.as_struct.parity = PARITY_NONE;
 	lcr.as_struct.unused = 0x00;
 	lcr.as_struct.dlab = false;
 	PortWrite8(LINE_CONTROL, lcr.as_byte);
-	PortWrite8(INT_IDENT_AND_FIFO_CTRL, 0xC7); // FIXME: magic number
+	PortWrite8(INT_IDENT_AND_FIFO_CTRL, 0xC7);
 	IntEnableReg ier;
 	ier.as_struct.data_avail = true;
 	ier.as_struct.tx_empty = true;
