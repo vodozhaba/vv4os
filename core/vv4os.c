@@ -11,6 +11,7 @@
 #include "dt/desc_tables.h"
 #include "io/disk/disk.h"
 #include "io/pci.h"
+#include "io/uart.h"
 #include "io/vga_terminal.h"
 #include "mem/phys_mem_mgr.h"
 #include "mem/virt_mem_mgr.h"
@@ -60,5 +61,7 @@ void main(MultibootInformation* mi) {
     }
     DiskSubsystemInit();
     printf("Initialized the disk subsystem\n");
+    UartInit(UART_DEFAULT_FREQ);
+    printf("Initialized UART (baudrate %d)\n", UART_DEFAULT_FREQ);
     while(true);
 }
