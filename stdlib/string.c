@@ -31,3 +31,12 @@ char* strcpy(char* dest, const char* src) {
 	}
 	return dest;
 }
+
+const char* strchr(const char* str, int character) {
+	for(size_t i = 0; i < strlen(str); i++) {
+		if(str[i] == character) {
+			return &str[i];
+		}
+	}
+	return NULL;
+}
