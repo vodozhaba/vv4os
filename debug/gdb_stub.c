@@ -25,7 +25,7 @@ __attribute__((unused)) static void SendDebugChar(char c) {
 #endif
 }
 
-__attribute__((unused)) static char* ReadPacket(char* buf, size_t size) {
+char* ReadPacket(char* buf, size_t size) {
 	char first = ReadDebugChar();
 	if(first != '$') {
 		return NULL;
@@ -37,7 +37,7 @@ __attribute__((unused)) static char* ReadPacket(char* buf, size_t size) {
 		if(i == size - 1) {
 			return NULL;
 		}
-		buf[i++] = c;
+		buf[i] = c;
 		checksum += c;
 	}
 	buf[i] = '\0';
