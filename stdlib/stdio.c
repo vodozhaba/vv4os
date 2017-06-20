@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include "io/vga_terminal.h"
 #include "stdlib/stdio.h"
@@ -25,6 +26,10 @@ int _puts(const char* s) {
     return 0;
 }
 
+int isspace (int c) {
+	return strchr(" \t\n\v\f\r", c) != NULL;
+}
+
 int printf(const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
@@ -33,59 +38,114 @@ int printf(const char* fmt, ...) {
             putchar(fmt[i]);
             continue;
         }
-        char c = fmt[++i];
+        size_t width = 0;
+        char c, pad_c = ' ';
+    next:
+        c = fmt[++i];
         switch(c) {
-            case '%': {
-                putchar('%');
-                break;
-            }
-            case 'd':
-            case 'i': {
-                int arg = va_arg(args, int);
-                char str[32];
-                itoa(arg, str, 10);
-                puts(str);
-                break;
-            }
-            case 'u': {
-                unsigned int arg = va_arg(args, unsigned int);
-                char str[32];
-                utoa(arg, str, 10);
-                puts(str);
-                break;
-            }
-            case 'o': {
-                unsigned int arg = va_arg(args, unsigned int);
-                char str[32];
-                utoa(arg, str, 8);
-                puts(str);
-                break;
-            }
-            case 'x': {
-                unsigned int arg = va_arg(args, unsigned int);
-                char str[32];
-                utoa_lc(arg, str, 16);
-                puts(str);
-                break;
-            }
-            case 'X': {
-                unsigned int arg = va_arg(args, unsigned int);
-                char str[32];
-                utoa(arg, str, 16);
-                puts(str);
-                break;
-            }
-            case 'c': {
-                char arg = va_arg(args, int);
-                putchar(arg);
-                break;
-            }
-            case 's': {
-                char* arg = va_arg(args, char*);
-                puts(arg);
-                break;
-            }
+        case '0': {
+			pad_c = '0';
+			goto next; // sorry!
         }
+    	case '1':
+    	case '2':
+    	case '3':
+    	case '4':
+    	case '5':
+    	case '6':
+    	case '7':
+    	case '8':
+    	case '9': {
+    		width = atoi(&fmt[i]);
+    		goto next;
+    	}
+        case '%': {
+            putchar('%');
+            break;
+        }
+        case 'd':
+        case 'i': {
+            int arg = va_arg(args, int);
+            char str[32];
+            itoa(arg, str, 10);
+            size_t len = strlen(str);
+            if(len < width) {
+            	for(size_t k = 0; k < width - len; k++) {
+            		putchar(pad_c);
+            	}
+            }
+            puts(str);
+            break;
+        }
+        case 'u': {
+            unsigned int arg = va_arg(args, unsigned int);
+            char str[32];
+            utoa(arg, str, 10);
+            size_t len = strlen(str);
+            if(len < width) {
+            	for(size_t k = 0; k < width - len; k++) {
+            		putchar(pad_c);
+            	}
+            }
+            puts(str);
+            break;
+        }
+        case 'o': {
+            unsigned int arg = va_arg(args, unsigned int);
+            char str[32];
+            utoa(arg, str, 8);
+            size_t len = strlen(str);
+            if(len < width) {
+            	for(size_t k = 0; k < width - len; k++) {
+            		putchar(pad_c);
+            	}
+            }
+            puts(str);
+            break;
+        }
+        case 'x': {
+            unsigned int arg = va_arg(args, unsigned int);
+            char str[32];
+            utoa_lc(arg, str, 16);
+            size_t len = strlen(str);
+            if(len < width) {
+            	for(size_t k = 0; k < width - len; k++) {
+            		putchar(pad_c);
+            	}
+            }
+            puts(str);
+            break;
+        }
+        case 'X': {
+            unsigned int arg = va_arg(args, unsigned int);
+            char str[32];
+            utoa(arg, str, 16);
+            size_t len = strlen(str);
+            if(len < width) {
+            	for(size_t k = 0; k < width - len; k++) {
+            		putchar(pad_c);
+            	}
+            }
+            puts(str);
+            break;
+        }
+        case 'c': {
+            char arg = va_arg(args, int);
+            putchar(arg);
+            break;
+        }
+        case 's': {
+            char* str = va_arg(args, char*);
+            size_t len = strlen(str);
+            if(len < width) {
+            	for(size_t k = 0; k < width - len; k++) {
+            		putchar(pad_c);
+            	}
+            }
+            puts(str);
+            break;
+        }
+    }
     }
     va_end(args);
     /* TODO add valid return value */
@@ -98,11 +158,28 @@ int sprintf(char* dest, const char* fmt, ...) {
     size_t j = 0;
     for(size_t i = 0; fmt[i]; i++) {
         if(fmt[i] != '%') {
-            dest[j++] = '%';
+            dest[j++] = fmt[i];
             continue;
         }
-        char c = fmt[++i];
+        size_t width = 0;
+        char c, pad_c = ' ';
+    next:
+        c = fmt[++i];
         switch(c) {
+        	case '0':
+        		pad_c = '0';
+        		goto next; // sorry!
+        	case '1':
+        	case '2':
+        	case '3':
+        	case '4':
+        	case '5':
+        	case '6':
+        	case '7':
+        	case '8':
+        	case '9':
+        		width = atoi(&fmt[i]);
+        		goto next;
             case '%': {
                 dest[j++] = '%';
                 break;
@@ -112,6 +189,12 @@ int sprintf(char* dest, const char* fmt, ...) {
                 int arg = va_arg(args, int);
                 char str[32];
                 itoa(arg, str, 10);
+                size_t len = strlen(str);
+                if(len < width) {
+                	for(size_t k = 0; k < width - len; k++) {
+                		dest[j++] += pad_c;
+                	}
+                }
                 strcpy(&dest[j], str);
                 j += strlen(str);
                 break;
@@ -120,6 +203,12 @@ int sprintf(char* dest, const char* fmt, ...) {
                 unsigned int arg = va_arg(args, unsigned int);
                 char str[32];
                 utoa(arg, str, 10);
+                size_t len = strlen(str);
+                if(len < width) {
+                	for(size_t k = 0; k < width - len; k++) {
+                		dest[j++] += pad_c;
+                	}
+                }
                 strcpy(&dest[j], str);
                 j += strlen(str);
                 break;
@@ -128,6 +217,12 @@ int sprintf(char* dest, const char* fmt, ...) {
                 unsigned int arg = va_arg(args, unsigned int);
                 char str[32];
                 utoa(arg, str, 8);
+                size_t len = strlen(str);
+                if(len < width) {
+                	for(size_t k = 0; k < width - len; k++) {
+                		dest[j++] += pad_c;
+                	}
+                }
                 strcpy(&dest[j], str);
                 j += strlen(str);
                 break;
@@ -136,6 +231,12 @@ int sprintf(char* dest, const char* fmt, ...) {
                 unsigned int arg = va_arg(args, unsigned int);
                 char str[32];
                 utoa_lc(arg, str, 16);
+                size_t len = strlen(str);
+                if(len < width) {
+                	for(size_t k = 0; k < width - len; k++) {
+                		dest[j++] += pad_c;
+                	}
+                }
                 strcpy(&dest[j], str);
                 j += strlen(str);
                 break;
@@ -144,6 +245,12 @@ int sprintf(char* dest, const char* fmt, ...) {
                 unsigned int arg = va_arg(args, unsigned int);
                 char str[32];
                 utoa(arg, str, 16);
+                size_t len = strlen(str);
+                if(len < width) {
+                	for(size_t k = 0; k < width - len; k++) {
+                		dest[j++] += pad_c;
+                	}
+                }
                 strcpy(&dest[j], str);
                 j += strlen(str);
                 break;
@@ -154,15 +261,20 @@ int sprintf(char* dest, const char* fmt, ...) {
                 break;
             }
             case 's': {
-                char* arg = va_arg(args, char*);
-                strcpy(&dest[j], arg);
-                j += strlen(arg);
+                char* str = va_arg(args, char*);
+                size_t len = strlen(str);
+                if(len < width) {
+                	for(size_t k = 0; k < width - len; k++) {
+                		dest[j++] += pad_c;
+                	}
+                }
+                strcpy(&dest[j], str);
+                j += strlen(str);
                 break;
             }
         }
     }
     dest[j] = 0;
     va_end(args);
-    /* TODO add valid return value */
-    return 0;
+    return strlen(dest);
 }
