@@ -15,7 +15,7 @@ SECTIONS
     {
         *(.data)
     }
-    .bss BLOCK(16K) : ALIGN(4K)
+    .bss BLOCK(16K) : ALIGN(16K)
     {
         *(COMMON)
         *(.bss)
