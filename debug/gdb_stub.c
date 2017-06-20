@@ -11,7 +11,10 @@
 #include "core/config.h"
 #include "io/uart.h"
 #include "stdlib/stdio.h"
+#include "stdlib/stdlib.h"
 #include "stdlib/string.h"
+
+#define BUF_SIZE 400
 
 // Comment out to try infinitely
 #define MAX_SEND_ATTEMPTS 3
@@ -30,7 +33,7 @@ static void SendDebugChar(char c) {
 #endif
 }
 
-__attribute__((unused)) static char* ReadPacket(char* buf, size_t size) {
+static char* ReadPacket(char* buf, size_t size) {
 	char first = ReadDebugChar();
 	while(first != '$');
 	char c;
@@ -81,7 +84,22 @@ __attribute__((unused)) static void SendPacket(char* data) {
 }
 
 static void Breakpoint(__attribute__((unused)) InterruptedCpuState* state) {
-	while(true);
+	char* read_buf = malloc(BUF_SIZE);
+	char* send_buf = malloc(BUF_SIZE);
+	ReadPacket(read_buf, BUF_SIZE);
+	char* seek = read_buf;
+	char cmd = *(seek++);
+	switch(cmd) {
+	case 'g':
+		sprintf(send_buf, "%08x%08x%08x%08x%08x%08x%08x0000%04x0000%04x0000%04x0000%04x",
+				state->eax, state->ecx, state->edx, state->ebx,
+				state->ebp, state->esi, state->edi,
+				state->ds, state->ds, state->ds, state->ds);
+		break;
+	}
+	SendPacket(send_buf);
+	free(send_buf);
+	free(read_buf);
 }
 
 void GdbStubInit() {
