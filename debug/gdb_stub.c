@@ -13,6 +13,9 @@
 #include "stdlib/stdio.h"
 #include "stdlib/string.h"
 
+// Comment out to try infinitely
+#define MAX_SEND_ATTEMPTS 3
+
 static const char* alphabet = "0123456789abcdef";
 
 static char ReadDebugChar() {
@@ -50,6 +53,30 @@ __attribute__((unused)) static char* ReadPacket(char* buf, size_t size) {
 	} else {
 		SendDebugChar('-');
 		return NULL;
+	}
+}
+
+__attribute__((unused)) static void SendPacket(char* data) {
+#if defined(MAX_SEND_ATTEMPTS)
+	for(size_t a = 0; a < MAX_SEND_ATTEMPTS; a++)
+#else
+	while(true)
+#endif
+	{
+		SendDebugChar('$');
+		uint8_t checksum;
+		char c;
+		for(size_t i = 0; (c = data[i]) != '\0'; i++, checksum += c) {
+			SendDebugChar(c);
+		}
+		SendDebugChar('#');
+		char nibble_1 = alphabet[checksum / 16];
+		char nibble_2 = alphabet[checksum % 16];
+		SendDebugChar(nibble_1);
+		SendDebugChar(nibble_2);
+		if(ReadDebugChar() == '+') {
+			break;
+		}
 	}
 }
 
