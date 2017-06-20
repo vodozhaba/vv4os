@@ -7,8 +7,10 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include "arch/x86/dt/idt_x86.h"
 #include "core/config.h"
 #include "io/uart.h"
+#include "stdlib/stdio.h"
 #include "stdlib/string.h"
 
 static const char* alphabet = "0123456789abcdef";
@@ -25,7 +27,7 @@ __attribute__((unused)) static void SendDebugChar(char c) {
 #endif
 }
 
-char* ReadPacket(char* buf, size_t size) {
+__attribute__((unused)) static char* ReadPacket(char* buf, size_t size) {
 	char first = ReadDebugChar();
 	if(first != '$') {
 		return NULL;
@@ -50,3 +52,16 @@ char* ReadPacket(char* buf, size_t size) {
 	}
 }
 
+static void Breakpoint(__attribute__((unused)) volatile InterruptedCpuState state) {
+	while(true);
+}
+
+void GdbStubInit() {
+#if defined(__X86__)
+	X86RegisterIsrHandler(3, Breakpoint);
+#endif
+#if defined(WAIT_FOR_GDB)
+	printf("Waiting for GDB remote connection...\n");
+	__asm("int3");
+#endif
+}
