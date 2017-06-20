@@ -16,3 +16,4 @@
 int putchar(int character);
 int _puts(const char* s);
 int printf(const char* fmt, ...);
+int sprintf(char* dest, const char* fmt, ...);
