@@ -309,7 +309,7 @@ Use32
  	X86SoftInt FF
 
 	X86IsrCommon:
-		pusha
+		pushad
 		xor eax, eax
 		mov ax, ds
 		push eax
@@ -330,7 +330,7 @@ Use32
 		iret
 
 	X86SoftIntCommon:
-		pusha
+		pushad
 		xor eax, eax
 		mov ax, ds
 		push eax
@@ -351,7 +351,7 @@ Use32
 		iret
 
 		X86IrqCommon:
-		pusha
+		pushad
 		xor eax, eax
 		mov ax, ds
 		push eax
