@@ -335,21 +335,21 @@ static void RegisterInterrupt(uint8_t n, void (*handler)(), uint8_t type) {
 
 void X86IsrHandler(__attribute__((unused)) InterruptedCpuState state) {
     if(isr_handlers[state.interrupt]) {
-        isr_handlers[state.interrupt](state);
+        isr_handlers[state.interrupt](&state);
     }
 }
 
 void X86SoftIntHandler(__attribute__((unused)) InterruptedCpuState state) {
     uint32_t interrupt = state.interrupt - 0x30;
     if(soft_int_handlers[interrupt]) {
-        soft_int_handlers[interrupt](state);
+        soft_int_handlers[interrupt](&state);
     }
 }
 
 void X86IrqHandler(InterruptedCpuState state) {
     uint32_t interrupt = state.interrupt - IRQ(0);
     if(irq_handlers[interrupt]) {
-        irq_handlers[interrupt](state);
+        irq_handlers[interrupt](&state);
     }
     if(state.interrupt > IRQ(7)) {
         PortWrite8(0xA0, 0x20);

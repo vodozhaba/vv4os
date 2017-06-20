@@ -29,7 +29,7 @@ typedef struct {
     uint32_t ss;
 } __attribute__((packed)) InterruptedCpuState;
 
-typedef void (*InterruptHandler)(InterruptedCpuState);
+typedef void (*InterruptHandler)(InterruptedCpuState*);
 
 #define IRQ(x) ((x) + 0x20)
 

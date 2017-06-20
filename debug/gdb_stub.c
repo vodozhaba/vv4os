@@ -80,7 +80,7 @@ __attribute__((unused)) static void SendPacket(char* data) {
 	}
 }
 
-static void Breakpoint(__attribute__((unused)) volatile InterruptedCpuState state) {
+static void Breakpoint(__attribute__((unused)) InterruptedCpuState* state) {
 	while(true);
 }
 
