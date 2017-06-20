@@ -21,7 +21,7 @@ static char ReadDebugChar() {
 #endif
 }
 
-__attribute__((unused)) static void SendDebugChar(char c) {
+static void SendDebugChar(char c) {
 #if defined(UART_DEBUGGING)
 	UartSend(c);
 #endif
@@ -29,14 +29,13 @@ __attribute__((unused)) static void SendDebugChar(char c) {
 
 __attribute__((unused)) static char* ReadPacket(char* buf, size_t size) {
 	char first = ReadDebugChar();
-	if(first != '$') {
-		return NULL;
-	}
+	while(first != '$');
 	char c;
 	uint8_t checksum = 0;
 	size_t i;
 	for(i = 0; (c = ReadDebugChar()) != '#'; i++) {
 		if(i == size - 1) {
+			SendDebugChar('-');
 			return NULL;
 		}
 		buf[i] = c;
@@ -46,8 +45,10 @@ __attribute__((unused)) static char* ReadPacket(char* buf, size_t size) {
 	uint8_t nibble_1 = (size_t)(strchr(alphabet, ReadDebugChar()) - alphabet);
 	uint8_t nibble_2 = (size_t)(strchr(alphabet, ReadDebugChar()) - alphabet);
 	if(nibble_1 * 16 + nibble_2 == checksum) {
+		SendDebugChar('+');
 		return buf;
 	} else {
+		SendDebugChar('-');
 		return NULL;
 	}
 }
