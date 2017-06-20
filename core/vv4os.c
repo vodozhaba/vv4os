@@ -48,10 +48,12 @@ void main(MultibootInformation* mi) {
     printf("Initialized processor descriptor tables\n");
     UartInit(UART_DEFAULT_FREQ);
     printf("Initialized UART (baudrate %d)\n", UART_DEFAULT_FREQ);
+#if defined(DEBUG)
 #if defined(UART_DEBUGGING)
     printf("This build supports debugging over UART.\n");
 #endif
     GdbStubInit();
+#endif
     available_ram = (mi->mem_upper + 1024) << 10;
     printf("Detected %dMiB of RAM\n", available_ram / 1048576);
     PhysMemMgrInit(available_ram);
