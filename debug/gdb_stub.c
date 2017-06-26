@@ -83,7 +83,7 @@ static void SendPacket(char* data) {
 }
 
 static void Breakpoint(__attribute__((unused)) InterruptedCpuState* state) {
-	ReadPacket(read_buf, GDB_PACKET_BUF_SIZE);
+	while(ReadPacket(read_buf, GDB_PACKET_BUF_SIZE) == NULL);
 	char* seek = read_buf;
 	char cmd = *(seek++);
 	switch(cmd) {
