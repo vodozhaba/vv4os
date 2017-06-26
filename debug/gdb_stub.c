@@ -42,7 +42,11 @@ static char* ReadPacket(char* buf, size_t size) {
 			SendDebugChar('-');
 			return NULL;
 		}
-		buf[i] = c;
+		if(c == '}') {
+			buf[i] = (c = ReadDebugChar());
+		} else {
+			buf[i] = c;
+		}
 		checksum += c;
 	}
 	buf[i] = '\0';
@@ -68,6 +72,9 @@ static void SendPacket(char* data) {
 		uint8_t checksum;
 		char c;
 		for(size_t i = 0; (c = data[i]) != '\0'; i++, checksum += c) {
+			if(c == '#' || c == '$' || c == '}' || c == '*') {
+				SendDebugChar('}');
+			}
 			SendDebugChar(c);
 		}
 		SendDebugChar('#');
