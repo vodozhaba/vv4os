@@ -5,6 +5,8 @@
  * Purpose:    Allows debugging VV4OS with GDB without external tools.        *
  ******************************************************************************/
 
+#ifdef DEBUG
+
 #include <stddef.h>
 #include <stdint.h>
 #include "arch/x86/dt/idt_x86.h"
@@ -14,12 +16,9 @@
 #include "stdlib/stdlib.h"
 #include "stdlib/string.h"
 
-#define BUF_SIZE 400
-
-// Comment out to try infinitely
-#define MAX_SEND_ATTEMPTS 3
-
 static const char* alphabet = "0123456789abcdef";
+static char read_buf[GDB_PACKET_BUF_SIZE];
+static char send_buf[GDB_PACKET_BUF_SIZE];
 
 static char ReadDebugChar() {
 #if defined(UART_DEBUGGING)
@@ -84,9 +83,7 @@ __attribute__((unused)) static void SendPacket(char* data) {
 }
 
 static void Breakpoint(__attribute__((unused)) InterruptedCpuState* state) {
-	char* read_buf = malloc(BUF_SIZE);
-	char* send_buf = malloc(BUF_SIZE);
-	ReadPacket(read_buf, BUF_SIZE);
+	ReadPacket(read_buf, GDB_PACKET_BUF_SIZE);
 	char* seek = read_buf;
 	char cmd = *(seek++);
 	switch(cmd) {
@@ -98,8 +95,6 @@ static void Breakpoint(__attribute__((unused)) InterruptedCpuState* state) {
 		break;
 	}
 	SendPacket(send_buf);
-	free(send_buf);
-	free(read_buf);
 }
 
 void GdbStubInit() {
@@ -111,3 +106,5 @@ void GdbStubInit() {
 	__asm("int3");
 #endif
 }
+
+#endif
