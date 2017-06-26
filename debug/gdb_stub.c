@@ -58,9 +58,9 @@ static char* ReadPacket(char* buf, size_t size) {
 	}
 }
 
-__attribute__((unused)) static void SendPacket(char* data) {
-#if defined(MAX_SEND_ATTEMPTS)
-	for(size_t a = 0; a < MAX_SEND_ATTEMPTS; a++)
+static void SendPacket(char* data) {
+#if defined(GDB_MAX_SEND_ATTEMPTS)
+	for(size_t a = 0; a < GDB_MAX_SEND_ATTEMPTS; a++)
 #else
 	while(true)
 #endif
