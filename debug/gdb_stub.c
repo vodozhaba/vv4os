@@ -33,8 +33,7 @@ static void SendDebugChar(char c) {
 }
 
 static char* ReadPacket(char* buf, size_t size) {
-	char first = ReadDebugChar();
-	while(first != '$');
+	while(ReadDebugChar() != '$');
 	char c;
 	uint8_t checksum = 0;
 	size_t i;
