@@ -91,6 +91,7 @@ static void SendPacket(char* data) {
 static void Breakpoint(__attribute__((unused)) InterruptedCpuState* state) {
 	while(true) {
 		while(ReadPacket(read_buf, GDB_PACKET_BUF_SIZE) == NULL);
+		printf("GDB: \"%s\"\n", read_buf);
 		char* seek = read_buf;
 		char cmd = *(seek++);
 		switch(cmd) {
@@ -102,6 +103,7 @@ static void Breakpoint(__attribute__((unused)) InterruptedCpuState* state) {
 			break;
 		}
 		SendPacket(send_buf);
+		printf("GDB stub: \"%s\"\n", send_buf);
 	}
 }
 
