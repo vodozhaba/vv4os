@@ -89,18 +89,20 @@ static void SendPacket(char* data) {
 }
 
 static void Breakpoint(__attribute__((unused)) InterruptedCpuState* state) {
-	while(ReadPacket(read_buf, GDB_PACKET_BUF_SIZE) == NULL);
-	char* seek = read_buf;
-	char cmd = *(seek++);
-	switch(cmd) {
-	case 'g':
-		sprintf(send_buf, "%08x%08x%08x%08x%08x%08x%08x0000%04x0000%04x0000%04x0000%04x",
-				state->eax, state->ecx, state->edx, state->ebx,
-				state->ebp, state->esi, state->edi,
-				state->ds, state->ds, state->ds, state->ds);
-		break;
+	while(true) {
+		while(ReadPacket(read_buf, GDB_PACKET_BUF_SIZE) == NULL);
+		char* seek = read_buf;
+		char cmd = *(seek++);
+		switch(cmd) {
+		case 'g':
+			sprintf(send_buf, "%08x%08x%08x%08x%08x%08x%08x0000%04x0000%04x0000%04x0000%04x",
+					state->eax, state->ecx, state->edx, state->ebx,
+					state->ebp, state->esi, state->edi,
+					state->ds, state->ds, state->ds, state->ds);
+			break;
+		}
+		SendPacket(send_buf);
 	}
-	SendPacket(send_buf);
 }
 
 void GdbStubInit() {
