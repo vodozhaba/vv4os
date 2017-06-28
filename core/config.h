@@ -13,7 +13,7 @@
 #define UART_DEBUGGING
 
 // If defined, sets a breakpoint as soon as possible and waits for GDB connection.
-#define WAIT_FOR_GDB
+// #define WAIT_FOR_GDB
 
 // Defines the maximum size for a GDB packet.
 
