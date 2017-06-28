@@ -7,6 +7,7 @@
 
 #ifdef DEBUG
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include "arch/x86/dt/idt_x86.h"
