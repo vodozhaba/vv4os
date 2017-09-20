@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1)
 
 cmake_policy(VERSION 3.1)
 
-project(vv4os C)
+project(vv4os_kernel C)
 
 set(CMAKE_SYSTEM_NAME "Generic")
 set(CMAKE_SYSTEM_PROCESSOR "i686")
