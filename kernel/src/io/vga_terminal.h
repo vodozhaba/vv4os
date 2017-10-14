@@ -39,7 +39,7 @@ static const VgaColorScheme link_color_scheme = {
         .background = VGA_COLOR_BLACK
 };
 
-int VgaTerminalInit();
-int VgaTerminalPut(char c);
+void VgaTerminalInit();
+void VgaTerminalPut(char c);
 VgaColorScheme VgaTerminalGetColorScheme();
 void VgaTerminalSwitchColorScheme(VgaColorScheme color_scheme);

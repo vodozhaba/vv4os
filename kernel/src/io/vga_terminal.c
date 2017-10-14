@@ -7,31 +7,27 @@
 
 #include "vga_terminal.h"
 #include <stddef.h>
+#include "stdlib/assert.h"
 #include "ports.h"
 
-static const int VGA_BUFFER_HEIGHT = 25, VGA_BUFFER_WIDTH = 80;
+static const unsigned int VGA_BUFFER_HEIGHT = 25, VGA_BUFFER_WIDTH = 80;
 static const uint8_t STD_FG_COLOR = VGA_COLOR_LIGHT(VGA_COLOR_CYAN),
         STD_BG_COLOR = VGA_COLOR_BLACK;
 
 static VgaColorScheme current_color_scheme;
-static VgaEntry* vga_buffer = (VgaEntry*) 0xB8000;
-static int current_x = 0, current_y = 0;
+static volatile VgaEntry* vga_buffer = (VgaEntry*) 0xB8000;
+static unsigned int current_x = 0, current_y = 0;
 
-static int SetEntryAt(int x, int y, VgaEntry entry) {
-    if (x < 0 || x >= VGA_BUFFER_WIDTH || y < 0 || y >= VGA_BUFFER_HEIGHT)
-        return -1;
+static void SetEntryAt(unsigned int x, unsigned int y, VgaEntry entry) {
+    assert (x < VGA_BUFFER_WIDTH && y < VGA_BUFFER_HEIGHT);
     int i = y * VGA_BUFFER_WIDTH + x;
     vga_buffer[i] = entry;
-    return 0;
 }
 
-static int GetEntryAt(int x, int y, VgaEntry* entry) {
-    if (x < 0 || x >= VGA_BUFFER_WIDTH || y < 0 || y >= VGA_BUFFER_HEIGHT ||
-            entry == NULL)
-        return -1;
+static VgaEntry GetEntryAt(unsigned int x, unsigned int y) {
+    assert (x < VGA_BUFFER_WIDTH && y < VGA_BUFFER_HEIGHT);
     int i = y * VGA_BUFFER_WIDTH + x;
-    *entry = vga_buffer[i];
-    return 0;
+    return vga_buffer[i];
 }
 
 static VgaEntry ConstructVgaEntry (uint8_t character,
@@ -42,9 +38,8 @@ static VgaEntry ConstructVgaEntry (uint8_t character,
     return ret;
 }
 
-static int MoveCursorAt(int x, int y) {
-    if (x < 0 || x >= VGA_BUFFER_WIDTH || y < 0 || y >= VGA_BUFFER_HEIGHT)
-        return -1;
+static int MoveCursorAt(unsigned int x, unsigned int y) {
+    assert (x < VGA_BUFFER_WIDTH && y < VGA_BUFFER_HEIGHT);
     current_x = x;
     current_y = y;
     /* Moving hardware cursor */
@@ -56,66 +51,50 @@ static int MoveCursorAt(int x, int y) {
     return 0;
 }
 
-static int Scroll() {
-    int res;
-    VgaEntry entry;
-    for(int y = 1; y < VGA_BUFFER_HEIGHT; ++y) {
-        for(int x = 0; x < VGA_BUFFER_WIDTH; ++x) {
-            res = GetEntryAt(x, y, &entry);
-            if(res != 0)
-                return res;
-            res = SetEntryAt(x, y - 1, entry);
-            if(res != 0)
-                return res;
+static void Scroll() {
+    for(unsigned int y = 1; y < VGA_BUFFER_HEIGHT; ++y) {
+        for(unsigned int x = 0; x < VGA_BUFFER_WIDTH; ++x) {
+            VgaEntry entry = GetEntryAt(x, y);
+            SetEntryAt(x, y - 1, entry);
         }
     }
     VgaEntry whitespace = ConstructVgaEntry(' ', current_color_scheme);
-    for(int x = 0; x < VGA_BUFFER_WIDTH; ++x) {
-        res = SetEntryAt(x, VGA_BUFFER_HEIGHT - 1, whitespace);
-        if(res != 0)
-            return res;
+    for(unsigned int x = 0; x < VGA_BUFFER_WIDTH; ++x) {
+        SetEntryAt(x, VGA_BUFFER_HEIGHT - 1, whitespace);
     }
-    return MoveCursorAt(current_x, current_y - 1);
+    MoveCursorAt(current_x, current_y - 1);
 }
 
-static int AdvanceCursor(int n) {
-    int value = current_x + n; /* I don't know how to name it */
-    int lines = value / VGA_BUFFER_WIDTH;
-    int new_x = value % VGA_BUFFER_WIDTH;
+static void AdvanceCursor(int n) {
+    unsigned int value = current_x + n; /* I don't know how to name it */
+    unsigned int lines = value / VGA_BUFFER_WIDTH;
+    unsigned int new_x = value % VGA_BUFFER_WIDTH;
     while(current_y + lines >= VGA_BUFFER_HEIGHT) {
-        int res = Scroll();
-        if(res != 0)
-            return res;
+        Scroll();
     }
-    return MoveCursorAt(new_x, current_y + lines);
+    MoveCursorAt(new_x, current_y + lines);
 }
 
-int VgaTerminalInit() {
+void VgaTerminalInit() {
     MoveCursorAt(0, 0);
     current_color_scheme.foreground = STD_FG_COLOR;
     current_color_scheme.background = STD_BG_COLOR;
     VgaEntry whitespace = ConstructVgaEntry(' ', current_color_scheme);
-    for (int y = 0; y < VGA_BUFFER_HEIGHT; y++) {
-        for (int x = 0; x < VGA_BUFFER_WIDTH; x++) {
-            int ret = SetEntryAt(x, y, whitespace);
-            if (ret != 0)
-                return ret;
+    for (unsigned int y = 0; y < VGA_BUFFER_HEIGHT; y++) {
+        for (unsigned int x = 0; x < VGA_BUFFER_WIDTH; x++) {
+            SetEntryAt(x, y, whitespace);
         }
     }
-    return 0;
 }
 
-int VgaTerminalPut(char c) {
-    int res;
+void VgaTerminalPut(char c) {
     switch(c) {
         case '\n':
             return AdvanceCursor(VGA_BUFFER_WIDTH - current_x);
         default:
-            res = SetEntryAt(current_x, current_y,
+            SetEntryAt(current_x, current_y,
                     ConstructVgaEntry(c, current_color_scheme));
-            if(res != 0)
-                return res;
-            return AdvanceCursor(1);
+            AdvanceCursor(1);
     }
 }
 
