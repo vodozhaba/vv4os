@@ -28,7 +28,7 @@ file(GLOB_RECURSE SRC_H
 
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "i.86")
 	add_definitions(-D__X86__)
-	set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf32")
+	set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf")
 endif()
 
 enable_language(ASM_NASM)
