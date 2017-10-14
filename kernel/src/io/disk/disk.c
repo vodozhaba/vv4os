@@ -1,7 +1,7 @@
 /******************************************************************************
  * File:       /vv4os/io/disk/disk.h                                          *
  * Author:     vodozhaba                                                      *
- * Created on: Apr 24. 2017                                                   *
+ * Created on: Apr 24, 2017                                                   *
  * Purpose:    Controls the disk subsystem.                                   *
  ******************************************************************************/
 
@@ -25,8 +25,8 @@ void DiskSubsystemInit() {
 		if(class_code == PCI_CLASS_CODE_MASS_STORAGE_CONTROLLER) {
 			uint8_t subclass = PciConfigReadFromDevice8(controller, PCI_CONFIG_COMMON_OFFSET_SUBCLASS);
 			switch(subclass) {
-			default:
-				printf("Detected an unsupported mass storage controller.\nSome drives might be absent.\n");
+                default:
+                    printf("Detected an unsupported mass storage controller.\nSome drives might be absent.\n");
 			}
 		}
 	}
