@@ -14,7 +14,8 @@
 #include "stdlib/string.h"
 
 int putchar(int character) {
-    return VgaTerminalPut((char) character);
+    VgaTerminalPut((char) character);
+    return character;
 }
 
 int _puts(const char* s) {
