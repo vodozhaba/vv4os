@@ -1,9 +1,7 @@
-/******************************************************************************
- * File:       /vv4os/mem/virt_mem_mgr.h                                      *
- * Author:     vodozhaba                                                      *
- * Created on: Oct 12, 2016                                                   *
- * Purpose:    Aliases virtual memory managers for different architectures.   *
- ******************************************************************************/
+// File:       mem/virt_mem_mgr.h                                      
+// Author:     vodozhaba                                                      
+// Created on: Oct 12, 2016                                                   
+// Purpose:    Aliases virtual memory managers for different architectures.
 
 #pragma once
 

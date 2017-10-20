@@ -1,9 +1,7 @@
-/******************************************************************************
- * File:       /vv4os/boot/multiboot/multiboot.h                              *
- * Author:     vodozhaba                                                      *
- * Created on: Sep 30, 2016                                                   *
- * Purpose:    Allows working with Multiboot-compliant bootloaders.           *
- ******************************************************************************/
+// File:       boot/multiboot/multiboot.h
+// Author:     vodozhaba
+// Created on: Sep 30, 2016
+// Purpose:    Allows working with Multiboot-compliant bootloaders.           
 
 #pragma once
 

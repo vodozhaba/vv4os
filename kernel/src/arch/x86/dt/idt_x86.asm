@@ -1,4 +1,4 @@
-; File:       /vv4os/arch/x86/dt/idt_x86.asm
+; File:       arch/x86/dt/idt_x86.asm
 ; Author:     vodozhaba
 ; Created on: Oct 1, 2016
 ; Purpose:    Allows working with x86 Interrupt Descriptor Table.

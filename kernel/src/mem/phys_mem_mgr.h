@@ -1,9 +1,7 @@
-/******************************************************************************
- * File:       /vv4os/mem/phys_mem_mgr.c                                      *
- * Author:     vodozhaba                                                      *
- * Created on: Sep 30, 2016                                                   *
- * Purpose:    Aliases physical memory managers for different architectures.  *
- ******************************************************************************/
+// File:       mem/phys_mem_mgr.c
+// Author:     vodozhaba                                                      
+// Created on: Sep 30, 2016                                                   
+// Purpose:    Aliases physical memory managers for different architectures.
 
 #pragma once
 

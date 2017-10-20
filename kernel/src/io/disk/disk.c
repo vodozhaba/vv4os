@@ -1,9 +1,10 @@
-/******************************************************************************
- * File:       /vv4os/io/disk/disk.h                                          *
- * Author:     vodozhaba                                                      *
- * Created on: Apr 24, 2017                                                   *
- * Purpose:    Controls the disk subsystem.                                   *
- ******************************************************************************/
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
+// File:       io/disk/disk.c
+// Author:     vodozhaba
+// Created on: Apr 24, 2017
+// Purpose:    Controls the disk subsystem.                                   
 
 #include <stddef.h>
 #include "io/pci.h"

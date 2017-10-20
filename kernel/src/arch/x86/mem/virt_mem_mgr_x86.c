@@ -1,9 +1,10 @@
-/******************************************************************************
- * File:       /vv4os/arch/x86/mem/virt_mem_mgr_x86.c                         *
- * Author:     vodozhaba                                                      *
- * Created on: Oct 11, 2016                                                   *
- * Purpose:    Translates virtual memory to physical and (de)allocates it.    *
- ******************************************************************************/
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
+// File:       arch/x86/mem/virt_mem_mgr_x86.c
+// Author:     vodozhaba
+// Created on: Oct 11, 2016
+// Purpose:    Translates virtual memory to physical and (de)allocates it.
 
 #include <stdint.h>
 #include <stdbool.h>

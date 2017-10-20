@@ -1,9 +1,10 @@
-/******************************************************************************
- * File:       /vv4os/io/pci.c                                                *
- * Author:     vodozhaba                                                      *
- * Created on: Apr 23, 2017                                                   *
- * Purpose:    Allows working with the PCI bus.                               *
- ******************************************************************************/
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
+// File:       io/pci.c
+// Author:     vodozhaba
+// Created on: Apr 23, 2017
+// Purpose:    Allows working with the PCI bus.
 
 #include "pci.h"
 #include <stdbool.h>

@@ -1,9 +1,7 @@
-/******************************************************************************
- * File:       /vv4os/core/config.h                                           *
- * Author:     vodozhaba                                                      *
- * Created on: Jun 19, 2017                                                   *
- * Purpose:    Allows configuring VV4OS.                                      *
- ******************************************************************************/
+// File:       core/config.h
+// Author:     vodozhaba
+// Created on: Jun 19, 2017
+// Purpose:    Allows configuring VV4OS.
 
 #pragma once
 

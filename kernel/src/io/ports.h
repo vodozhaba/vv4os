@@ -1,9 +1,7 @@
-/******************************************************************************
- * File:       /vv4os/s.h                                                     *
- * Author:     vodozhaba                                                      *
- * Created on: Aug 21, 2016                                                   *
- * Purpose:    Provides functions for port I/O.                               *
- ******************************************************************************/
+// File:       io/ports.h
+// Author:     vodozhaba
+// Created on: Aug 21, 2016
+// Purpose:    Provides functions for port I/O.                               
 
 #pragma once
 

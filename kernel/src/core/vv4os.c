@@ -1,9 +1,10 @@
-/******************************************************************************
- * File:       /vv4os/core/vv4os.c                                            *
- * Author:     vodozhaba                                                      *
- * Created on: Aug 20, 2016                                                   *
- * Purpose:    The main file of the project, connects all the modules.        *
- ******************************************************************************/
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
+// File:       core/vv4os.c
+// Author:     vodozhaba
+// Created on: Aug 20, 2016
+// Purpose:    The main file of the project, connects all the modules.        
 
 #include <stdbool.h>
 #include <stddef.h>

@@ -1,9 +1,10 @@
-/******************************************************************************
- * File:       /vv4os/arch/x86/dt/gdt.c                                       *
- * Author:     vodozhaba                                                      *
- * Created on: Oct 1, 2016                                                    *
- * Purpose:    Allows working with x86 Global Descriptor Table.               *
- ******************************************************************************/
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
+// File:       arch/x86/dt/gdt.c
+// Author:     vodozhaba
+// Created on: Oct 1, 2016
+// Purpose:    Allows working with x86 Global Descriptor Table.
 
 #include "gdt_x86.h"
 

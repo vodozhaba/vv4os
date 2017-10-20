@@ -1,9 +1,7 @@
-/******************************************************************************
- * File:       /vv4os/stdlib/stdlib.h                                         *
- * Author:     vodozhaba                                                      *
- * Created on: Aug 21, 2016                                                   *
- * Purpose:    Provides standard functions.                                   *
- ******************************************************************************/
+// File:       stdlib/stdlib.h
+// Author:     vodozhaba
+// Created on: Aug 21, 2016
+// Purpose:    Provides standard functions.
 
 #pragma once
 

@@ -1,9 +1,7 @@
-/******************************************************************************
- * File:       /vv4os/stdlib/assert.h                                         *
- * Author:     vodozhaba                                                      *
- * Created on: Oct 14, 2017                                                   *
- * Purpose:    Provides the useful assert(bool) macro.                        *
- ******************************************************************************/
+// File:       stdlib/assert.h                                         
+// Author:     vodozhaba                                                      
+// Created on: Oct 14, 2017                                                   
+// Purpose:    Provides the useful assert(bool) macro.                        
 
 #include "stdbool.h"
 #include "stdio.h"

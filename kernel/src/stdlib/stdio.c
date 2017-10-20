@@ -1,9 +1,10 @@
-/******************************************************************************
- * File:       /vv4os/stdlib/stdio.c                                          *
- * Author:     vodozhaba                                                      *
- * Created on: Aug 21, 2016                                                   *
- * Purpose:    Provides standard I/O functions.                               *
- ******************************************************************************/
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
+// File:       stdlib/stdio.c
+// Author:     vodozhaba
+// Created on: Aug 21, 2016
+// Purpose:    Provides standard I/O functions.
 
 #include <stdarg.h>
 #include <stdbool.h>

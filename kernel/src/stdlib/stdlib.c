@@ -1,9 +1,10 @@
-/******************************************************************************
- * File:       /vv4os/stdlib/stdlib.c                                         *
- * Author:     vodozhaba                                                      *
- * Created on: Aug 21, 2016                                                   *
- * Purpose:    Provides standard functions.                                   *
- ******************************************************************************/
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
+// File:       stdlib/stdlib.c
+// Author:     vodozhaba
+// Created on: Aug 21, 2016
+// Purpose:    Provides standard functions.
 
 #include <stdbool.h>
 #include <stddef.h>

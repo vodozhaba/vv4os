@@ -1,9 +1,10 @@
-/******************************************************************************
- * File:       /vv4os/arch/x86/mem/phys_mem_mgr_x86.c                         *
- * Author:     vodozhaba                                                      *
- * Created on: Sep 30, 2016                                                   *
- * Purpose:    Manages physical memory, allows (de)allocating it on x86.      *
- ******************************************************************************/
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
+// File:       arch/x86/mem/phys_mem_mgr_x86.c
+// Author:     vodozhaba
+// Created on: Sep 30, 2016
+// Purpose:    Manages physical memory, allows (de)allocating it on x86.
 
 #include <stdint.h>
 #include <stddef.h>

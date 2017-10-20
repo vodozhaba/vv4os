@@ -1,9 +1,7 @@
-/******************************************************************************
- * File:       /vv4os/stdlib/stdio.h                                          *
- * Author:     vodozhaba                                                      *
- * Created on: Aug 21, 2016                                                   *
- * Purpose:    Provides standard I/O functions.                               *
- ******************************************************************************/
+// File:       stdlib/stdio.h
+// Author:     vodozhaba
+// Created on: Aug 21, 2016
+// Purpose:    Provides standard I/O functions.
 
 #pragma once
 

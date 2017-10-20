@@ -1,9 +1,10 @@
-/******************************************************************************
- * File:       /vv4os/io/vga_terminal.c                                       *
- * Author:     vodozhaba                                                      *
- * Created on: Aug 20, 2016                                                   *
- * Purpose:    Module for VGA 80x25 terminal.                                 *
- ******************************************************************************/
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
+// File:       io/vga_terminal.c
+// Author:     vodozhaba                                                      
+// Created on: Aug 20, 2016                                                   
+// Purpose:    Module for VGA 80x25 terminal.                                 
 
 #include "vga_terminal.h"
 #include <stddef.h>

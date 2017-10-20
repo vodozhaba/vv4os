@@ -1,9 +1,10 @@
-/******************************************************************************
- * File:       /vv4os/debug/gdb_stub.c                                        *
- * Author:     vodozhaba                                                      *
- * Created on: Jun 20, 2017                                                   *
- * Purpose:    Allows debugging VV4OS with GDB without external tools.        *
- ******************************************************************************/
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
+// File:       debug/gdb_stub.c
+// Author:     vodozhaba
+// Created on: Jun 20, 2017
+// Purpose:    Allows debugging VV4OS with GDB without external tools.        
 
 #ifdef DEBUG
 

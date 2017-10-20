@@ -1,9 +1,7 @@
-/******************************************************************************
- * File:       /vv4os/dt/desc_tables.h                                        *
- * Author:     vodozhaba                                                      *
- * Created on: Oct 9, 2016                                                    *
- * Purpose:    Aliases descriptor table managers for different architectures. *
- ******************************************************************************/
+// File:       dt/desc_tables.h
+// Author:     vodozhaba
+// Created on: Oct 9, 2016
+// Purpose:    Aliases descriptor table managers for different architectures.
 
 #pragma once
 

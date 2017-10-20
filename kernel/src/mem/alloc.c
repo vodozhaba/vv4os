@@ -1,9 +1,10 @@
-/******************************************************************************
- * File:       /vv4os/mem/alloc.c                                             *
- * Author:     vodozhaba                                                      *
- * Created on: Apr 20, 2017                                                   *
- * Purpose:    Provides malloc group of functions.                            *
- ******************************************************************************/
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
+// File:       mem/alloc.c
+// Author:     vodozhaba
+// Created on: Apr 20, 2017
+// Purpose:    Provides malloc group of functions.
 
 #include <stdbool.h>
 #include <stddef.h>
