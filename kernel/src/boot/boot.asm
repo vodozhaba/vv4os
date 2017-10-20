@@ -40,35 +40,35 @@ DEPTH equ 0
 
 section .multiboot
 align 4
-	dd MAGIC
-	dd FLAGS
-	dd CHECKSUM
-	dd HEADER_ADDR
-	dd LOAD_ADDR
-	dd LOAD_END_ADDR
-	dd BSS_END_ADDR
-	dd ENTRY_ADDR
-	dd MODE_TYPE
-	dd WIDTH
-	dd HEIGHT
+    dd MAGIC
+    dd FLAGS
+    dd CHECKSUM
+    dd HEADER_ADDR
+    dd LOAD_ADDR
+    dd LOAD_END_ADDR
+    dd BSS_END_ADDR
+    dd ENTRY_ADDR
+    dd MODE_TYPE
+    dd WIDTH
+    dd HEIGHT
     dd DEPTH
 
 section .bootstrap_stack, nobits
 align 16
-	stack_bottom:
-		resb 16384 ; 16K of stack seem enough
-	stack_top:
+    stack_bottom:
+	    resb 16384 ; 16K of stack seem enough
+    stack_top:
 
 section .text
 Use32
-	global _start
-	_start:
-	mov esp, stack_top ; Stack grows in a backwards direction
-	push ebx
-	extern main
-	call main
-	add esp, 4
-	cli ; If main returns, we will halt the computer
+    global _start
+    _start:
+    mov esp, stack_top ; Stack grows in a backwards direction
+    push ebx
+    extern main
+    call main
+    add esp, 4
+    cli ; If main returns, we will halt the computer
 .halt:
-	hlt
-	jmp .halt
+    hlt
+    jmp .halt

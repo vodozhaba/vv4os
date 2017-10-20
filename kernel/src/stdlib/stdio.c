@@ -29,7 +29,7 @@ int _puts(const char* s) {
 }
 
 int isspace (int c) {
-	return strchr(" \t\n\v\f\r", c) != NULL;
+    return strchr(" \t\n\v\f\r", c) != NULL;
 }
 
 int printf(const char* fmt, ...) {
@@ -46,21 +46,21 @@ int printf(const char* fmt, ...) {
         c = fmt[++i];
         switch(c) {
         case '0': {
-			pad_c = '0';
-			goto next; // sorry!
+    	    pad_c = '0';
+    	    goto next; // sorry!
         }
-    	case '1':
-    	case '2':
-    	case '3':
-    	case '4':
-    	case '5':
-    	case '6':
-    	case '7':
-    	case '8':
-    	case '9': {
-    		width = atoi(&fmt[i]);
-    		goto next;
-    	}
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9': {
+    	    width = atoi(&fmt[i]);
+    	    goto next;
+        }
         case '%': {
             putchar('%');
             break;
@@ -72,9 +72,9 @@ int printf(const char* fmt, ...) {
             itoa(arg, str, 10);
             size_t len = strlen(str);
             if(len < width) {
-            	for(size_t k = 0; k < width - len; k++) {
-            		putchar(pad_c);
-            	}
+                for(size_t k = 0; k < width - len; k++) {
+            	    putchar(pad_c);
+                }
             }
             puts(str);
             break;
@@ -85,9 +85,9 @@ int printf(const char* fmt, ...) {
             utoa(arg, str, 10);
             size_t len = strlen(str);
             if(len < width) {
-            	for(size_t k = 0; k < width - len; k++) {
-            		putchar(pad_c);
-            	}
+                for(size_t k = 0; k < width - len; k++) {
+            	    putchar(pad_c);
+                }
             }
             puts(str);
             break;
@@ -98,9 +98,9 @@ int printf(const char* fmt, ...) {
             utoa(arg, str, 8);
             size_t len = strlen(str);
             if(len < width) {
-            	for(size_t k = 0; k < width - len; k++) {
-            		putchar(pad_c);
-            	}
+                for(size_t k = 0; k < width - len; k++) {
+            	    putchar(pad_c);
+                }
             }
             puts(str);
             break;
@@ -111,9 +111,9 @@ int printf(const char* fmt, ...) {
             utoa_lc(arg, str, 16);
             size_t len = strlen(str);
             if(len < width) {
-            	for(size_t k = 0; k < width - len; k++) {
-            		putchar(pad_c);
-            	}
+                for(size_t k = 0; k < width - len; k++) {
+            	    putchar(pad_c);
+                }
             }
             puts(str);
             break;
@@ -124,9 +124,9 @@ int printf(const char* fmt, ...) {
             utoa(arg, str, 16);
             size_t len = strlen(str);
             if(len < width) {
-            	for(size_t k = 0; k < width - len; k++) {
-            		putchar(pad_c);
-            	}
+                for(size_t k = 0; k < width - len; k++) {
+            	    putchar(pad_c);
+                }
             }
             puts(str);
             break;
@@ -140,9 +140,9 @@ int printf(const char* fmt, ...) {
             char* str = va_arg(args, char*);
             size_t len = strlen(str);
             if(len < width) {
-            	for(size_t k = 0; k < width - len; k++) {
-            		putchar(pad_c);
-            	}
+                for(size_t k = 0; k < width - len; k++) {
+            	    putchar(pad_c);
+                }
             }
             puts(str);
             break;
@@ -168,20 +168,20 @@ int sprintf(char* dest, const char* fmt, ...) {
     next:
         c = fmt[++i];
         switch(c) {
-        	case '0':
-        		pad_c = '0';
-        		goto next; // sorry!
-        	case '1':
-        	case '2':
-        	case '3':
-        	case '4':
-        	case '5':
-        	case '6':
-        	case '7':
-        	case '8':
-        	case '9':
-        		width = atoi(&fmt[i]);
-        		goto next;
+            case '0':
+        	    pad_c = '0';
+        	    goto next; // sorry!
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+        	    width = atoi(&fmt[i]);
+        	    goto next;
             case '%': {
                 dest[j++] = '%';
                 break;
@@ -193,9 +193,9 @@ int sprintf(char* dest, const char* fmt, ...) {
                 itoa(arg, str, 10);
                 size_t len = strlen(str);
                 if(len < width) {
-                	for(size_t k = 0; k < width - len; k++) {
-                		dest[j++] += pad_c;
-                	}
+                    for(size_t k = 0; k < width - len; k++) {
+                	    dest[j++] += pad_c;
+                    }
                 }
                 strcpy(&dest[j], str);
                 j += strlen(str);
@@ -207,9 +207,9 @@ int sprintf(char* dest, const char* fmt, ...) {
                 utoa(arg, str, 10);
                 size_t len = strlen(str);
                 if(len < width) {
-                	for(size_t k = 0; k < width - len; k++) {
-                		dest[j++] += pad_c;
-                	}
+                    for(size_t k = 0; k < width - len; k++) {
+                	    dest[j++] += pad_c;
+                    }
                 }
                 strcpy(&dest[j], str);
                 j += strlen(str);
@@ -221,9 +221,9 @@ int sprintf(char* dest, const char* fmt, ...) {
                 utoa(arg, str, 8);
                 size_t len = strlen(str);
                 if(len < width) {
-                	for(size_t k = 0; k < width - len; k++) {
-                		dest[j++] += pad_c;
-                	}
+                    for(size_t k = 0; k < width - len; k++) {
+                	    dest[j++] += pad_c;
+                    }
                 }
                 strcpy(&dest[j], str);
                 j += strlen(str);
@@ -235,9 +235,9 @@ int sprintf(char* dest, const char* fmt, ...) {
                 utoa_lc(arg, str, 16);
                 size_t len = strlen(str);
                 if(len < width) {
-                	for(size_t k = 0; k < width - len; k++) {
-                		dest[j++] += pad_c;
-                	}
+                    for(size_t k = 0; k < width - len; k++) {
+                	    dest[j++] += pad_c;
+                    }
                 }
                 strcpy(&dest[j], str);
                 j += strlen(str);
@@ -249,9 +249,9 @@ int sprintf(char* dest, const char* fmt, ...) {
                 utoa(arg, str, 16);
                 size_t len = strlen(str);
                 if(len < width) {
-                	for(size_t k = 0; k < width - len; k++) {
-                		dest[j++] += pad_c;
-                	}
+                    for(size_t k = 0; k < width - len; k++) {
+                	    dest[j++] += pad_c;
+                    }
                 }
                 strcpy(&dest[j], str);
                 j += strlen(str);
@@ -266,9 +266,9 @@ int sprintf(char* dest, const char* fmt, ...) {
                 char* str = va_arg(args, char*);
                 size_t len = strlen(str);
                 if(len < width) {
-                	for(size_t k = 0; k < width - len; k++) {
-                		dest[j++] += pad_c;
-                	}
+                    for(size_t k = 0; k < width - len; k++) {
+                	    dest[j++] += pad_c;
+                    }
                 }
                 strcpy(&dest[j], str);
                 j += strlen(str);

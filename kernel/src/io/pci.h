@@ -9,22 +9,22 @@
 #include <stdint.h>
 
 typedef struct PciDevice {
-	uint8_t bus;
-	uint8_t device : 5;
-	uint8_t function : 3;
-	struct PciDevice* next;
+    uint8_t bus;
+    uint8_t device : 5;
+    uint8_t function : 3;
+    struct PciDevice* next;
 } __attribute__((packed)) PciDevice;
 
 typedef struct {
-	uint8_t header_type : 7;
-	bool mf : 1;
+    uint8_t header_type : 7;
+    bool mf : 1;
 } __attribute__((packed)) PciConfigHeaderType;
 
 typedef struct {
-	uint8_t completion_code : 4;
-	uint8_t reserved : 2;
-	bool start_bist : 1;
-	bool bist_capable : 1;
+    uint8_t completion_code : 4;
+    uint8_t reserved : 2;
+    bool start_bist : 1;
+    bool bist_capable : 1;
 } __attribute__((packed)) PciConfigBistRegister;
 
 #define PCI_CONFIG_COMMON_OFFSET_VENDOR_ID 0x00

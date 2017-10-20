@@ -115,23 +115,23 @@ void exit(int status) {
 }
 
 int atoi(const char* str) {
-	static const char* digits = "0123456789";
-	size_t i;
-	for(i = 0; isspace(str[i]); i++);
-	int sign = 1;
-	if(str[i] == '-') {
-		sign = -1;
-		i++;
-	} else if(str[i] == '+') {
-		i++;
-	}
-	int ret = 0;
-	for(const char* ptr; (ptr = strchr(digits, str[i])); i++) {
-		if(ptr == NULL) {
-			break;
-		}
-		ret *= 10;
-		ret += ptr - digits;
-	}
-	return ret * sign;
+    static const char* digits = "0123456789";
+    size_t i;
+    for(i = 0; isspace(str[i]); i++);
+    int sign = 1;
+    if(str[i] == '-') {
+	    sign = -1;
+	    i++;
+    } else if(str[i] == '+') {
+	    i++;
+    }
+    int ret = 0;
+    for(const char* ptr; (ptr = strchr(digits, str[i])); i++) {
+	    if(ptr == NULL) {
+    	    break;
+	    }
+	    ret *= 10;
+	    ret += ptr - digits;
+    }
+    return ret * sign;
 }

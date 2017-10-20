@@ -30,8 +30,8 @@ size_t available_ram;
 char config[MAX_CONF_SIZE];
 
 bool ParseConfig() {
-	config[strlen(CONF_SIGNATURE)] = '\0';
-	return strcmp(config, CONF_SIGNATURE) == 0;
+    config[strlen(CONF_SIGNATURE)] = '\0';
+    return strcmp(config, CONF_SIGNATURE) == 0;
 }
 
 void main(MultibootInformation* mi) {
@@ -41,9 +41,9 @@ void main(MultibootInformation* mi) {
     VgaTerminalInit();
     printf("Initialized VGA terminal\n");
     if(mi->mods_count != 1) {
-    	VgaTerminalSwitchColorScheme(err_color_scheme);
-    	printf("Something's wrong with the boot modules. Aborting");
-    	exit(1);
+        VgaTerminalSwitchColorScheme(err_color_scheme);
+        printf("Something's wrong with the boot modules. Aborting");
+        exit(1);
     }
     DescTablesInit();
     printf("Initialized processor descriptor tables\n");
@@ -64,11 +64,11 @@ void main(MultibootInformation* mi) {
     PciInit();
     printf("Initialized PCI driver\n");
     if(ParseConfig())
-    	printf("Parsed the boot config successfully\n");
+        printf("Parsed the boot config successfully\n");
     else {
-    	VgaTerminalSwitchColorScheme(err_color_scheme);
-    	printf("Cannot parse the boot config. Is there a valid /sys/vv4os/boot.cfg?\n");
-    	exit(1);
+        VgaTerminalSwitchColorScheme(err_color_scheme);
+        printf("Cannot parse the boot config. Is there a valid /sys/vv4os/boot.cfg?\n");
+        exit(1);
     }
     DiskSubsystemInit();
     printf("Initialized the disk subsystem\n");
