@@ -8,6 +8,9 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "boot/multiboot/multiboot.h"
 #include "core/config.h"
 #include "debug/gdb_stub.h"
@@ -18,9 +21,6 @@
 #include "io/vga_terminal.h"
 #include "mem/phys_mem_mgr.h"
 #include "mem/virt_mem_mgr.h"
-#include "stdlib/stdio.h"
-#include "stdlib/stdlib.h"
-#include "stdlib/string.h"
 
 #define MAX_CONF_SIZE 4096
 #define CONF_SIGNATURE "notjunk"

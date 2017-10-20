@@ -7,8 +7,11 @@ project(vv4os_kernel C)
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(KERNEL "kernel.elf")
 set(LD_SCRIPT "linker.ld")
-set(C_FLAGS "-Wall -Wextra -Werror -ffreestanding -std=c11 -I${SRC_DIR}")
+set(C_FLAGS "${CFLAGS} -Wall -Wextra -Werror -ffreestanding -std=c11")
 set(LINKER_FLAGS "-ffreestanding -nostdlib -lgcc -T${SRC_DIR}/${LD_SCRIPT}")
+
+include_directories("${SRC_DIR}")
+include_directories(SYSTEM "${SRC_DIR}/stdlib")
 
 file(GLOB_RECURSE SRC_ASM
 	RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"

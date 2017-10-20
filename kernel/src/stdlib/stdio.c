@@ -9,10 +9,10 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "io/vga_terminal.h"
-#include "stdlib/stdio.h"
-#include "stdlib/stdlib.h"
-#include "stdlib/string.h"
 
 int putchar(int character) {
     VgaTerminalPut((char) character);

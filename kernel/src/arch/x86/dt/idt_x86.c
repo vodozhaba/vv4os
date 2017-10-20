@@ -7,10 +7,10 @@
 // Purpose:    Allows working with x86 Interrupt Descriptor Table.
 
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "idt_x86.h"
 #include "io/ports.h"
-#include "stdlib/stdio.h"
-#include "stdlib/stdlib.h"
 
 typedef struct {
     uint16_t size;

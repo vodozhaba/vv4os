@@ -8,8 +8,8 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include "mem/virt_mem_mgr.h"
-#include "stdlib/stdlib.h"
 
 #define BIG_SIGNATURE ((size_t) 0xB0A013F4)
 #define SMALL_SIGNATURE ((size_t) 0xAFCBF74C)

@@ -10,9 +10,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include "arch/x86/dt/idt_x86.h"
 #include "io/ports.h"
-#include "stdlib/stdlib.h"
 
 #define PCI_CONFIG_ADDRESS_PORT 0xCF8
 #define PCI_CONFIG_DATA_PORT 0xCFC

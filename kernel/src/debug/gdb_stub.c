@@ -11,12 +11,12 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "arch/x86/dt/idt_x86.h"
 #include "core/config.h"
 #include "io/uart.h"
-#include "stdlib/stdio.h"
-#include "stdlib/stdlib.h"
-#include "stdlib/string.h"
 
 static const char* alphabet = "0123456789abcdef";
 static char read_buf[GDB_PACKET_BUF_SIZE];

@@ -8,11 +8,11 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "arch/x86/dt/idt_x86.h"
 #include "io/vga_terminal.h"
 #include "mem/phys_mem_mgr.h"
-#include "stdlib/stdio.h"
-#include "stdlib/stdlib.h"
 
 typedef struct {
     bool present : 1;

@@ -8,7 +8,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include "stdlib/stdlib.h"
+#include <stdlib.h>
 
 static uint32_t bitmap[32768];
 static uint32_t total_frames;

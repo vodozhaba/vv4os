@@ -7,8 +7,8 @@
 // Purpose:    Controls the disk subsystem.                                   
 
 #include <stddef.h>
+#include <stdio.h>
 #include "io/pci.h"
-#include "stdlib/stdio.h"
 
 #define PCI_SUBCLASS_SCSI_BUS_CONTROLLER 0x00
 #define PCI_SUBCLASS_IDE_CONTROLLER 0x01

@@ -8,7 +8,7 @@
 
 #include "vga_terminal.h"
 #include <stddef.h>
-#include "stdlib/assert.h"
+#include <assert.h>
 #include "ports.h"
 
 static const unsigned int VGA_BUFFER_HEIGHT = 25, VGA_BUFFER_WIDTH = 80;

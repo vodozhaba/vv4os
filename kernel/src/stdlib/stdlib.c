@@ -9,9 +9,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 #include "io/vga_terminal.h"
-#include "stdlib/stdio.h"
-#include "stdlib/string.h"
 
 static unsigned int digits(unsigned int x, int base) {
     if(x == 0)
