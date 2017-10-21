@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.1)
-
 cmake_policy(VERSION 3.1)
 
 project(vv4os_kernel C)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS On)
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(KERNEL "kernel.elf")
 set(LD_SCRIPT "linker.ld")
