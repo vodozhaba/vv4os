@@ -22,8 +22,8 @@ int putchar(int character) {
 int _puts(const char* s) {
     for(size_t i = 0; s[i] != 0x00; ++i) {
         int res = putchar(s[i]);
-        if(res != 0)
-            return res;
+        if(res != s[i])
+            return -1;
     }
     return 0;
 }
