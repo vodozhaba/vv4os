@@ -6,45 +6,32 @@
 // Created on: Sep 30, 2016
 // Purpose:    Manages physical memory, allows (de)allocating it on x86.
 
+#include "mem/phys_mem_mgr.h"
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include "util/bitmap.h"
 
-static uint32_t bitmap[32768];
-static uint32_t total_frames;
+#define BITMAP_LEN (4294967296 / FRAME_SIZE)
+#define BITMAP_DZ (16 * 1048576 / FRAME_SIZE)
+
+static Bitmap bitmap;
+static uint8_t bitmap_data[BITMAP_SIZE(BITMAP_LEN, BITMAP_DZ)];
 
 void X86PhysMemMgrInit(size_t ram_size) {
-    total_frames = ram_size / 4096;
-    memset(bitmap, 0xFF, sizeof(bitmap)); // If there's a bug, let it better
-                                          // not give free memory than give
-                                          // some already allocated
-    for(uint32_t frame = 1; frame < 12288; frame++) {
-        bitmap[frame / 32] &= ~(1 << (frame % 32));
-    }
-    for(uint32_t frame = 16384; frame < total_frames; frame++) {
-        bitmap[frame / 32] &= ~(1 << (frame % 32));
-    }
+    bitmap.start = bitmap_data;
+    bitmap.len = ram_size / FRAME_SIZE;
+    bitmap.dead_zone = BITMAP_DZ;
 }
 
 void* X86PhysAllocateFrame() {
-    for(uint32_t ix = 0; ix < 32768; ix++) {
-        if(bitmap[ix] != 0xFFFFFFFF) {
-            uint32_t bit;
-            for(bit = 0; bitmap[ix] & (1 << bit); bit++);
-            bitmap[ix] |= (1 << bit);
-            return (void*)(4096 * (32 * ix + bit));
-        }
+    size_t k = AllocateInBitmap(&bitmap, 1);
+    if(k == BITMAP_INVALID_WORD_IX) {
+        return NULL;
     }
-    return NULL;
+    return (void*)(k * FRAME_SIZE);
 }
 
 void X86PhysFreeFrame(void* ptr) {
-    if(ptr == NULL) {
-        return;
-    }
-    uint32_t frame = (uint32_t) ptr / 4096;
-    if(frame >= total_frames) {
-        return;
-    }
-    bitmap[frame / 32] &= ~(1 << (frame % 32));
+    FreeInBitmap(&bitmap, (uintptr_t) ptr / FRAME_SIZE, 1);
 }
