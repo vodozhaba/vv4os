@@ -17,10 +17,12 @@
 #include "dt/desc_tables.h"
 #include "io/disk/disk.h"
 #include "io/pci.h"
+#include "io/ports.h"
 #include "io/uart.h"
 #include "io/vga_terminal.h"
 #include "mem/phys_mem_mgr.h"
 #include "mem/virt_mem_mgr.h"
+#include "util/bitmap.h"
 
 #define MAX_CONF_SIZE 4096
 #define CONF_SIGNATURE "notjunk"
@@ -72,5 +74,7 @@ void main(MultibootInformation* mi) {
     }
     DiskSubsystemInit();
     printf("Initialized the disk subsystem\n");
+    IoPortMgrInit();
+    printf("Initialized the I/O port manager\n");
     while(true);
 }

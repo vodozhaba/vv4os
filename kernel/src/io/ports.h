@@ -36,3 +36,10 @@ static inline uint32_t PortRead32(uint16_t port) {
     __asm volatile("inl %w1, %d0" : "=a" (ret) : "d" (port));
     return ret;
 }
+
+// Can be used for I/O, but is never returned as a valid port by the manager
+#define PORT_ILLEGAL_VALUE 0
+
+void IoPortMgrInit(void);
+uint16_t AllocPorts(uint16_t len);
+void FreePorts(uint16_t start, uint16_t len);
