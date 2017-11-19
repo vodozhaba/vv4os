@@ -9,7 +9,7 @@
 
 // as long as the length is a size_t, a word index cannot exceed SIZE_T_MAX - 1
 #define BITMAP_INVALID_WORD_IX SIZE_MAX
-#define DECL_STATIC_BITMAP_CONTAINER(n, l, d) static size_t n[((l) - (d)) / (sizeof(size_t) * CHAR_BIT) + ((l) - (d)) % (sizeof(size_t) * CHAR_BIT) ? 1 : 0]
+#define BITMAP_SIZE(l, d) ((l) - (d))
 
 typedef struct {
     void* start;
