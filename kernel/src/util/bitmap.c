@@ -47,6 +47,9 @@ void MarkInBitmap(Bitmap* bitmap, size_t first, size_t len, bool allocated) {
 size_t AllocateInBitmap(Bitmap* bitmap, size_t len) {
     assert(bitmap);
     size_t first = FindInBitmap(bitmap, len);
+    if(first == BITMAP_INVALID_WORD_IX) {
+        return BITMAP_INVALID_WORD_IX;
+    }
     MarkInBitmap(bitmap, first, len, true);
     return first;
 }

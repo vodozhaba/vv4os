@@ -20,7 +20,6 @@ void IoPortMgrInit() {
     bitmap.len = UINT16_MAX + 1;
     bitmap.dead_zone = BITMAP_DZ;
     InitBitmap(&bitmap, false);
-    __attribute__((unused)) size_t x = sizeof(bitmap_data);
 }
 
 uint16_t AllocPorts(uint16_t len) {

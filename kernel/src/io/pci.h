@@ -12,8 +12,9 @@ typedef struct PciDevice {
     uint8_t bus;
     uint8_t device : 5;
     uint8_t function : 3;
+    void* data;
     struct PciDevice* next;
-} __attribute__((packed)) PciDevice;
+} PciDevice;
 
 typedef struct {
     uint8_t header_type : 7;

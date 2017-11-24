@@ -63,6 +63,8 @@ void main(MultibootInformation* mi) {
 #endif
     GdbStubInit();
 #endif
+    IoPortMgrInit();
+    printf("Initialized the I/O port manager\n");
     PciInit();
     printf("Initialized PCI driver\n");
     if(ParseConfig())
@@ -74,7 +76,5 @@ void main(MultibootInformation* mi) {
     }
     DiskSubsystemInit();
     printf("Initialized the disk subsystem\n");
-    IoPortMgrInit();
-    printf("Initialized the I/O port manager\n");
     while(true);
 }
