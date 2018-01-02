@@ -8,6 +8,7 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include "io/disk/ide.h"
 #include "io/pci.h"
 
 #define PCI_SUBCLASS_SCSI_BUS_CONTROLLER 0x00
@@ -26,6 +27,9 @@ void DiskSubsystemInit() {
 	    if(class_code == PCI_CLASS_CODE_MASS_STORAGE_CONTROLLER) {
     	    uint8_t subclass = PciConfigReadFromDevice8(controller, PCI_CONFIG_COMMON_OFFSET_SUBCLASS);
     	    switch(subclass) {
+                case PCI_SUBCLASS_IDE_CONTROLLER:
+                    IdeControllerInit(controller);
+                    break;
                 default:
                     printf("Detected an unsupported mass storage controller.\nSome drives might be absent.\n");
     	    }
