@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "io/disk/disk.h"
 #include "io/pci.h"
 
-void IdeControllerInit(PciDevice* controller);
+DiskDescriptor* IdeControllerInit(PciDevice* controller);

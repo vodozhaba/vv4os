@@ -5,6 +5,14 @@
 
 #pragma once
 
+/* Disk subsystem */
+
+// The max amount of disks that can be attached to the system.
+#define MAX_DISKS 4096
+
+// If defined, the first disk detected is assigned the index 0, otherwise 1
+// #define DISK_INDICES_START_FROM_ZERO
+
 /* Debugging */
 
 // If defined, starts a GDB stub at the first COM port in the debugging version.
