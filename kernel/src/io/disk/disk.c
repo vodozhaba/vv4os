@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include "core/config.h"
 #include "io/disk/ide.h"
+#include "io/disk/mbr.h"
 #include "io/pci.h"
 #include "util/bitmap.h"
 
@@ -77,4 +78,17 @@ void DiskSubsystemInit() {
     	    }
 	    }
     }
+}
+
+static Lba48 GetPartitionStart(DiskDescriptor* disk, uint32_t partition) {
+    Mbr mbr;
+    disk->read_op(disk, 0, &mbr);
+    assert(partition < 4);
+    return mbr.partition_table[partition].start_lba;
+}
+
+void* PartitionReadSector(uint32_t disk_id, uint32_t partition, Lba48 sector, void* buf) {
+    DiskDescriptor* disk = GetDiskDescriptor(disk_id);
+    Lba48 base = GetPartitionStart(disk, partition);
+    return disk->read_op(disk, base + sector, buf);
 }
