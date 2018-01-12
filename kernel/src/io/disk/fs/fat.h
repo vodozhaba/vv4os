@@ -11,3 +11,4 @@
 
 Volume* FatMountVolume(DiskDescriptor* disk, uint32_t partition);
 FileDescriptor* Fat32TraverseOp(FileDescriptor* parent, char* name);
+size_t Fat32ReadOp(FileDescriptor* file, size_t size, void* buf);

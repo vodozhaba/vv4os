@@ -143,11 +143,15 @@ static void* Fat32ReadCluster(Volume* volume, uint32_t cluster, void* buf) {
 
 static FileDescriptor* GenFileDescriptor(Volume* volume, FatDirectoryEntry* entry) {
     FileDescriptor* ret = malloc(sizeof(*ret));
+    ret->seek = 0;
     ret->traverse_op = Fat32TraverseOp;
+    ret->read_op = Fat32ReadOp;
     ret->volume = volume;
     if(entry->sfn.attr & FAT_ATTR_DIRECTORY) {
+        ret->size = 0;
         ret->type = FD_TYPE_DIRECTORY;
     } else {
+        ret->size = entry->sfn.size;
         ret->type = FD_TYPE_FILE;
     }
     FatFileInternalData* fiid = malloc(sizeof(*fiid));
@@ -163,6 +167,55 @@ static uint32_t NextCluster(Volume* volume, uint32_t cluster) {
     PartitionReadSector(volume->disk, volume->partition, fvid->br.reserved_sectors + cluster / entries_per_sector, fat);
     uint32_t value = fat[cluster % entries_per_sector] & 0x0FFFFFFF;
     return value < FAT_ENTRY_BAD_SECTOR ? value : INVALID_CLUSTER;
+}
+
+size_t Fat32ReadOp(FileDescriptor* file, size_t size, void* buf) {
+    FatVolumeInternalData* fvid = file->volume->data;
+    FatFileInternalData* ffid = file->data;
+    void* cluster_buf = malloc(fvid->bytes_per_cluster);
+    size_t ret = 0;
+    size_t leading = fvid->bytes_per_cluster - file->seek % fvid->bytes_per_cluster;
+    uint32_t leading_cluster = file->seek / fvid->bytes_per_cluster, cluster = ffid->first_cluster;
+    for(size_t i = 0; i < leading_cluster; i++) {
+        cluster = NextCluster(file->volume, cluster);
+        if(cluster == INVALID_CLUSTER) {
+            free(cluster_buf);
+            return 0;
+        }
+    }
+    if(!Fat32ReadCluster(file->volume, cluster, cluster_buf)) {
+        free(cluster_buf);
+        return 0;
+    }
+    memcpy(buf, cluster_buf + fvid->bytes_per_cluster - leading, leading);
+    ret += leading;
+    buf += leading;
+    size -= leading;
+    uint32_t entire_clusters = size / fvid->bytes_per_cluster;
+    for(size_t i = 0; i < entire_clusters; i++) {
+        cluster = NextCluster(file->volume, cluster);
+        if(cluster == INVALID_CLUSTER || !Fat32ReadCluster(file->volume, cluster, buf)) {
+            free(cluster_buf);
+            file->seek += ret;
+            return ret;
+        }
+        ret += fvid->bytes_per_cluster;
+        buf += fvid->bytes_per_cluster;
+        size -= fvid->bytes_per_cluster;
+    }
+    if(size != 0) {
+        cluster = NextCluster(file->volume, cluster);
+        if(cluster == INVALID_CLUSTER || !Fat32ReadCluster(file->volume, cluster, cluster_buf)) {
+            free(cluster_buf);
+            file->seek += ret;
+            return ret;
+        }
+        memcpy(buf, cluster_buf, size);
+        ret += size;
+    }
+    free(cluster_buf);
+    file->seek += ret;
+    return ret;
 }
 
 FileDescriptor* Fat32TraverseOp(FileDescriptor* parent, char* name) {
