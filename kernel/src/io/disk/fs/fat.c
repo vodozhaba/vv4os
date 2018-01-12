@@ -196,15 +196,15 @@ size_t Fat32ReadOp(FileDescriptor* file, size_t size, void* buf) {
     }
     uint32_t entire_clusters = size / fvid->bytes_per_cluster;
     for(size_t i = 0; i < entire_clusters; i++) {
-        ret += fvid->bytes_per_cluster;
-        buf += fvid->bytes_per_cluster;
-        size -= fvid->bytes_per_cluster;
-        cluster = NextCluster(file->volume, cluster);
         if(cluster == INVALID_CLUSTER || !Fat32ReadCluster(file->volume, cluster, buf)) {
             free(cluster_buf);
             file->seek += ret;
             return ret;
         }
+        ret += fvid->bytes_per_cluster;
+        buf += fvid->bytes_per_cluster;
+        size -= fvid->bytes_per_cluster;
+        cluster = NextCluster(file->volume, cluster);
     }
     if(size != 0) {
         if(cluster == INVALID_CLUSTER || !Fat32ReadCluster(file->volume, cluster, cluster_buf)) {
@@ -274,9 +274,13 @@ FileDescriptor* Fat32TraverseOp(FileDescriptor* parent, char* name) {
                     size_t len = i + 1;
                     memcpy(seek, entry->sfn.name, len);
                     seek += len;
-                    *seek++ = '.';
-                    for(i = 2; entry->sfn.name[i] == ' ' && i >= 0; i--);
+                    for(i = 2; entry->sfn.extension[i] == ' ' && i >= 0; i--);
                     len = i + 1;
+                    if(len != 0) {
+                        *seek++ = '.';
+                        memcpy(seek, entry->sfn.extension, len);
+                        seek += len;
+                    }
                     *seek = 0x00;
                     seek = buf;
                     if(strcmp(buf, name) == 0) {
