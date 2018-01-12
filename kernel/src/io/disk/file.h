@@ -13,8 +13,14 @@ typedef FileDescriptor* (*FileTraverseOp)(FileDescriptor* parent, char* name);
 struct Volume;
 typedef struct Volume Volume;
 
+typedef enum {
+    FD_TYPE_FILE,
+    FD_TYPE_DIRECTORY
+} FileDescriptorType;
+
 struct FileDescriptor {
     Volume* volume;
     void* data;
     FileTraverseOp traverse_op;
+    FileDescriptorType type;
 };

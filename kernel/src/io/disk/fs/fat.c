@@ -145,6 +145,11 @@ static FileDescriptor* GenFileDescriptor(Volume* volume, FatDirectoryEntry* entr
     FileDescriptor* ret = malloc(sizeof(*ret));
     ret->traverse_op = Fat32TraverseOp;
     ret->volume = volume;
+    if(entry->sfn.attr & FAT_ATTR_DIRECTORY) {
+        ret->type = FD_TYPE_DIRECTORY;
+    } else {
+        ret->type = FD_TYPE_FILE;
+    }
     FatFileInternalData* fiid = malloc(sizeof(*fiid));
     fiid->first_cluster = (uint32_t) entry->sfn.cluster_number_high << 16 | entry->sfn.cluster_number_low;
     ret->data = fiid;
@@ -161,6 +166,9 @@ static uint32_t NextCluster(Volume* volume, uint32_t cluster) {
 }
 
 FileDescriptor* Fat32TraverseOp(FileDescriptor* parent, char* name) {
+    if(parent->type != FD_TYPE_DIRECTORY) {
+        return NULL;
+    }
     FatVolumeInternalData* fvid = parent->volume->data;
     FatFileInternalData* fiid = parent->data;
     FatDirectoryEntry* cluster = malloc(fvid->bytes_per_cluster);
@@ -247,6 +255,7 @@ static Volume* Fat32MountVolume(Volume* volume) {
     FileDescriptor* file = malloc(sizeof(*file));
     file->volume = volume;
     file->traverse_op = Fat32TraverseOp;
+    file->type = FD_TYPE_DIRECTORY;
     FatFileInternalData* file_data = malloc(sizeof(*file_data));
     file_data->first_cluster = volume_data->br.ebr.fat32.root_cluster_number;
     file->data = file_data;
