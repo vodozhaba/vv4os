@@ -8,7 +8,7 @@ set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(KERNEL "kernel.elf")
 set(LD_SCRIPT "linker.ld")
 set(C_FLAGS "${CFLAGS} -Wall -Wextra -Werror -ffreestanding -std=c11")
-set(LINKER_FLAGS "-ffreestanding -nostdlib -lgcc -T${SRC_DIR}/${LD_SCRIPT}")
+set(LINKER_FLAGS "-ffreestanding -nostdlib -T${SRC_DIR}/${LD_SCRIPT}")
 
 include_directories("${SRC_DIR}")
 include_directories(SYSTEM "${SRC_DIR}/stdlib")
@@ -49,3 +49,5 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LINKER_FLAGS}")
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "") # work around -rdynamic
 
 add_executable(${KERNEL} ${SRC_ASM} ${SRC_C} ${SRC_H})
+
+target_link_libraries(${KERNEL} gcc)
