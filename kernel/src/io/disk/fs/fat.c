@@ -174,37 +174,39 @@ size_t Fat32ReadOp(FileDescriptor* file, size_t size, void* buf) {
     FatFileInternalData* ffid = file->data;
     void* cluster_buf = malloc(fvid->bytes_per_cluster);
     size_t ret = 0;
-    size_t leading = fvid->bytes_per_cluster - file->seek % fvid->bytes_per_cluster;
-    uint32_t leading_cluster = file->seek / fvid->bytes_per_cluster, cluster = ffid->first_cluster;
-    for(size_t i = 0; i < leading_cluster; i++) {
+    size_t leading = (fvid->bytes_per_cluster - file->seek % fvid->bytes_per_cluster) % fvid->bytes_per_cluster;
+    uint32_t first_cluster = file->seek / fvid->bytes_per_cluster, cluster = ffid->first_cluster;
+    for(size_t i = 0; i < first_cluster; i++) {
         cluster = NextCluster(file->volume, cluster);
         if(cluster == INVALID_CLUSTER) {
             free(cluster_buf);
             return 0;
         }
     }
-    if(!Fat32ReadCluster(file->volume, cluster, cluster_buf)) {
-        free(cluster_buf);
-        return 0;
+    if(leading != 0) {
+        if(!Fat32ReadCluster(file->volume, cluster, cluster_buf)) {
+            free(cluster_buf);
+            return 0;
+        }
+        memcpy(buf, cluster_buf + fvid->bytes_per_cluster - leading, leading);
+        ret += leading;
+        buf += leading;
+        size -= leading;
+        cluster = NextCluster(file->volume, cluster);
     }
-    memcpy(buf, cluster_buf + fvid->bytes_per_cluster - leading, leading);
-    ret += leading;
-    buf += leading;
-    size -= leading;
     uint32_t entire_clusters = size / fvid->bytes_per_cluster;
     for(size_t i = 0; i < entire_clusters; i++) {
+        ret += fvid->bytes_per_cluster;
+        buf += fvid->bytes_per_cluster;
+        size -= fvid->bytes_per_cluster;
         cluster = NextCluster(file->volume, cluster);
         if(cluster == INVALID_CLUSTER || !Fat32ReadCluster(file->volume, cluster, buf)) {
             free(cluster_buf);
             file->seek += ret;
             return ret;
         }
-        ret += fvid->bytes_per_cluster;
-        buf += fvid->bytes_per_cluster;
-        size -= fvid->bytes_per_cluster;
     }
     if(size != 0) {
-        cluster = NextCluster(file->volume, cluster);
         if(cluster == INVALID_CLUSTER || !Fat32ReadCluster(file->volume, cluster, cluster_buf)) {
             free(cluster_buf);
             file->seek += ret;
