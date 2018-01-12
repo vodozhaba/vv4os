@@ -296,7 +296,7 @@ FileDescriptor* Fat32TraverseOp(FileDescriptor* parent, char* name) {
                     }
                     *seek = 0x00;
                     seek = buf;
-                    if(strcmp(buf, name) == 0) {
+                    if(strcasecmp(buf, name) == 0) {
                         FileDescriptor* ret = GenFileDescriptor(parent->volume, entry);
                         free(buf);
                         free(cluster);
@@ -304,7 +304,7 @@ FileDescriptor* Fat32TraverseOp(FileDescriptor* parent, char* name) {
                     }
                 } else {
                     seek = buf;
-                    if(strcmp(buf, name) == 0) {
+                    if(strcasecmp(buf, name) == 0) {
                         FileDescriptor* ret = GenFileDescriptor(parent->volume, entry);
                         free(buf);
                         free(cluster);
