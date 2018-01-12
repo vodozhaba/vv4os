@@ -4,7 +4,20 @@
 // File:       io/disk/fs/fat.c
 // Author:     vodozhaba
 // Created on: Jan 03, 2017
-// Purpose:    Provides file functions for FAT12/16/32 partitions.                                   
+// Purpose:    Make people suffer.                                   
+
+/*
+       ________________
+      /                \
+     /   __{______}__   \
+    /   /__/ o  o \__\   \
+   /   //  \_uuuu_/  \\   \
+  | ___W___(______)___W___ |
+  |/  ABANDON  ALL  HOPE  \|
+  (  YE  WHO  ENTER  HERE  )
+   \______________________/
+
+*/
 
 #include <stdbool.h>
 #include <stdlib.h>
