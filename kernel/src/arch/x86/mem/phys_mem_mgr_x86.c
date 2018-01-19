@@ -10,18 +10,23 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include "mem/kernel_mem.h"
 #include "util/bitmap.h"
 
 #define BITMAP_LEN (4294967296 / FRAME_SIZE)
-#define BITMAP_DZ (16 * 1048576 / FRAME_SIZE)
 
 static Bitmap bitmap;
-static uint8_t bitmap_data[BITMAP_SIZE(BITMAP_LEN, BITMAP_DZ)];
+static uint8_t bitmap_data[BITMAP_SIZE(BITMAP_LEN, 0)];
 
 void X86PhysMemMgrInit(size_t ram_size) {
     bitmap.start = bitmap_data;
     bitmap.len = ram_size / FRAME_SIZE;
-    bitmap.dead_zone = BITMAP_DZ;
+    uint32_t kernel_len = ((uint32_t) KERNEL_STATIC_MEM_END - ((uint32_t) KERNEL_STATIC_MEM_START & 0xFFFFF000));
+    uint32_t kernel_frames = kernel_len / FRAME_SIZE;
+    if(kernel_len % FRAME_SIZE) {
+        kernel_frames++;
+    }
+    bitmap.dead_zone = kernel_frames;
 }
 
 void* X86PhysAllocateFrame() {

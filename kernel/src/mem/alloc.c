@@ -35,14 +35,14 @@ typedef struct BlockEntry {
 static BlockEntry* bitmap_list = NULL;
 
 static void AllocateBlock() {
-    BlockEntry* metadata_frame = AllocateContiguousVirtualFrames(1);
+    BlockEntry* metadata_frame = AllocateContiguousVirtualFrames(1, true);
     memset(metadata_frame, 0, FRAME_SIZE);
     for(size_t i = 0; i < ENTRIES_PER_BLOCK - 1; i++) {
 	    metadata_frame[i].next = &metadata_frame[i + 1];
     }
     metadata_frame[ENTRIES_PER_BLOCK - 1].next = bitmap_list;
     for(size_t i = 0; i < ENTRIES_PER_BLOCK; i++) {
-	    metadata_frame[i].data_frame = AllocateContiguousVirtualFrames(1);
+	    metadata_frame[i].data_frame = AllocateContiguousVirtualFrames(1, true);
     }
     bitmap_list = metadata_frame;
 }
@@ -89,7 +89,7 @@ static void* SmallMalloc(size_t size) {
 // For (approximately) more than one frame
 static void* BigMalloc(size_t size) {
     size_t frames = size / FRAME_SIZE + (size % FRAME_SIZE ? 1 : 0);
-    size_t* addr = AllocateContiguousVirtualFrames(frames);
+    size_t* addr = AllocateContiguousVirtualFrames(frames, true);
     if(addr == NULL)
 	    return NULL;
     addr[0] = BIG_SIGNATURE;

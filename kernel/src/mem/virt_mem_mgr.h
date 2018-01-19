@@ -10,7 +10,7 @@
 #include "phys_mem_mgr.h"
 
 void X86VirtMemMgrInit();
-void* X86AllocateContiguousVirtualFrames(uint32_t frames);
+void* X86AllocateContiguousVirtualFrames(uint32_t frames, bool kernel);
 void X86FreeContiguousVirtualFrames(void* base, uint32_t frames);
 
 #if !defined(__X86__)
@@ -23,9 +23,9 @@ static inline void VirtMemMgrInit() {
 #endif
 }
 
-static inline void* AllocateContiguousVirtualFrames(size_t frames) {
+static inline void* AllocateContiguousVirtualFrames(size_t frames, bool kernel) {
 #if defined(__X86__)
-    return X86AllocateContiguousVirtualFrames(frames);
+    return X86AllocateContiguousVirtualFrames(frames, kernel);
 #endif
 }
 

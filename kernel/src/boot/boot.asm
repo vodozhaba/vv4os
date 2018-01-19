@@ -53,7 +53,11 @@ align 4
     dd HEIGHT
     dd DEPTH
 
-section .bootstrap_stack, nobits
+section .data
+align 0x1000
+BootPageDirectory:
+    times 1024 dd 0x00000000
+section .bss
 align 16
     stack_bottom:
 	    resb 16384 ; 16K of stack seem enough
@@ -63,6 +67,45 @@ section .text
 Use32
     global _start
     _start:
+    extern _KERNEL_STATIC_MEM_START
+    extern _KERNEL_STATIC_MEM_END
+    mov eax, _KERNEL_STATIC_MEM_END
+    mov edx, _KERNEL_STATIC_MEM_START
+    and edx, 0xFFFC0000 ; 4MiB alignment
+    sub eax, edx
+    xor edx, edx
+    mov ecx, 0x400000
+    div ecx
+    test edx, edx
+    jz .gen_pd
+    inc eax 
+    .gen_pd:
+    xor ecx, ecx
+    mov edx, 0x00000083
+    mov esi, BootPageDirectory
+    sub esi, _KERNEL_STATIC_MEM_START
+    mov edi, _KERNEL_STATIC_MEM_START
+    shr edi, 20
+    add edi, esi
+    mov cr3, esi
+    .gen_pde:
+    mov [esi], edx
+    mov [edi], edx
+    add esi, 0x00000004
+    add edi, 0x00000004
+    add edx, 0x00400000
+    inc ecx
+    cmp ecx, eax
+    jb .gen_pde
+    mov eax, cr4
+    or eax, 0x00000010
+    mov cr4, eax
+    mov eax, cr0
+    or eax, 0x80000000
+    mov cr0, eax
+    lea eax, [.higherhalf]
+    jmp eax
+.higherhalf:
     mov esp, stack_top ; Stack grows in a backwards direction
     push ebx
     extern main

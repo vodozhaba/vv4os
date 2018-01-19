@@ -20,6 +20,7 @@
 #include "io/ports.h"
 #include "io/uart.h"
 #include "io/vga_terminal.h"
+#include "mem/kernel_mem.h"
 #include "mem/phys_mem_mgr.h"
 #include "mem/virt_mem_mgr.h"
 #include "util/bitmap.h"
@@ -42,6 +43,9 @@ void main(MultibootInformation* mi) {
     memcpy(config, (void*) conf.mod_start, conf_size > MAX_CONF_SIZE ? MAX_CONF_SIZE : conf_size);
     VgaTerminalInit();
     printf("Initialized VGA terminal\n");
+    #if defined(DEBUG)
+    printf("Kernel loaded at 0x%X - 0x%X\n", KERNEL_STATIC_MEM_START, KERNEL_STATIC_MEM_END);
+    #endif
     if(mi->mods_count != 1) {
         VgaTerminalSwitchColorScheme(err_color_scheme);
         printf("Something's wrong with the boot modules. Aborting");
