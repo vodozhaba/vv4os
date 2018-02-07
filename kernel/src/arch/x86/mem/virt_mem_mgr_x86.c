@@ -6,11 +6,13 @@
 // Created on: Oct 11, 2016
 // Purpose:    Translates virtual memory to physical and (de)allocates it.
 
+#include "mem/virt_mem_mgr.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "arch/x86/dt/idt_x86.h"
+#include "core/config.h"
 #include "io/vga_terminal.h"
 #include "mem/kernel_mem.h"
 #include "mem/phys_mem_mgr.h"
@@ -59,32 +61,56 @@ static PageDirectoryEntry* kernel_page_directory = (PageDirectoryEntry*) _kernel
 static PageTableEntry* kernel_page_table = (PageTableEntry*) _kernel_page_table;
 static PageDirectoryEntry* current_page_directory;
 
-static PageTableEntry* GetPageTableEntryPtr(VirtualAddr vaddr,
-        PageDirectoryEntry* directory) {
+static void* AllocateMap(void* phys);
+static void UnmapFrame(void* virtual, PageDirectoryEntry* directory);
+
+static PageTableEntry GetPte(VirtualAddr vaddr, PageDirectoryEntry* directory) {
+    if(directory == kernel_page_directory) {
+        return kernel_page_table[vaddr.page.directory_entry * 1024 + vaddr.page.table_entry];
+    }
     PageDirectoryEntry pde = directory[vaddr.page.directory_entry];
     if(pde.present == false) {
-        return NULL;
+        PageTableEntry ret = { 0 };
+        return ret;
     }
-    PageTableEntry* table = KERNEL_STATIC_MEM_START + (uintptr_t)(pde.page_table_addr << 12);
-    PageTableEntry* pte = &table[vaddr.page.table_entry];
+    void* phys = (void*)(pde.page_table_addr << 12);
+    PageTableEntry* table = AllocateMap(phys);
+    PageTableEntry pte = table[vaddr.page.table_entry];
+    UnmapFrame(table, kernel_page_directory);
     return pte;
 }
 
-static PageTableEntry* CreatePageTable(VirtualAddr vaddr,
+static void CreatePageTable(VirtualAddr vaddr,
         PageDirectoryEntry* directory) {
-    PageDirectoryEntry* pde = &directory[vaddr.page.directory_entry];
-    PageTableEntry* table;
-    if(pde->present) {
-        table = KERNEL_STATIC_MEM_START + (uintptr_t)(pde->page_table_addr << 12);
-    } else {
-        table = PhysAllocateFrame();
+    void* phys = PhysAllocateFrame();
+    void* virt = AllocateMap(phys);
+    memset(virt, 0, FRAME_SIZE);
+    UnmapFrame(virt, kernel_page_directory);
+    PageDirectoryEntry pde = { 0 };
+    pde.writable = true;
+    pde.user = true;
+    pde.page_table_addr = (uint32_t) phys >> 12;
+    pde.present = true;
+    directory[vaddr.page.directory_entry] = pde;
+}
+
+static void SetPte(VirtualAddr vaddr, PageDirectoryEntry* directory, PageTableEntry pte) {
+    if(directory == kernel_page_directory) {
+        kernel_page_table[vaddr.page.directory_entry * 1024 + vaddr.page.table_entry] = pte;
+        return;
     }
-    memset(table, 0, FRAME_SIZE);
-    pde->writable = true;
-    pde->user = true;
-    pde->page_table_addr = (uint32_t) table >> 12;
-    pde->present = true;
-    return table;
+    PageDirectoryEntry* pde = &directory[vaddr.page.directory_entry];
+    if(pde->present == false) {
+        CreatePageTable(vaddr, directory);
+    }
+    void* phys = (void*)(pde->page_table_addr << 12);
+    PageTableEntry* table = AllocateMap(phys);
+    table[vaddr.page.table_entry] = pte;
+    UnmapFrame(table, kernel_page_directory);
+    // TODO: add conditional INVLPG for post-i486
+    uint32_t cr3;
+    __asm volatile("movl %%cr3, %d0" : "=a" (cr3));
+    __asm volatile("movl %d0, %%cr3" : : "a" (cr3));
 }
 
 static void MapFrame(void* virtual, void* physical, bool writable, bool cached,
@@ -93,22 +119,19 @@ static void MapFrame(void* virtual, void* physical, bool writable, bool cached,
     if(vaddr.page.directory_entry == 0 && vaddr.page.table_entry == 0) {
         return;
     }
-    PageTableEntry* pte = GetPageTableEntryPtr(vaddr, directory);
-    if(pte == NULL) {
-        PageTableEntry* table = CreatePageTable(vaddr, directory);
-        pte = &table[vaddr.page.table_entry];
-    }
-    pte->writable = writable;
-    pte->user = user;
-    pte->write_through_caching = false;
-    pte->cache_disable = !cached;
-    pte->dirty = false;
-    pte->zero = 0;
-    pte->global = false;
-    pte->ignored = 0;
-    pte->available = 0;
-    pte->page_frame_addr = (uint32_t) physical >> 12;
-    pte->present = true;
+    PageTableEntry pte;
+    pte.writable = writable;
+    pte.user = user;
+    pte.write_through_caching = false;
+    pte.cache_disable = !cached;
+    pte.dirty = false;
+    pte.zero = 0;
+    pte.global = false;
+    pte.ignored = 0;
+    pte.available = 0;
+    pte.page_frame_addr = (uint32_t) physical >> 12;
+    pte.present = true;
+    SetPte((VirtualAddr) virtual, directory, pte);
 }
 
 static void MapRange(void* virt_base, void* phys_base, uint32_t frames,
@@ -121,15 +144,10 @@ static void MapRange(void* virt_base, void* phys_base, uint32_t frames,
     }
 }
 
-static inline void SwitchPageDirectory(PageDirectoryEntry* directory) {
-    current_page_directory = directory;
-    __asm volatile("movl %d0, %%cr3" : : "a" ((void*) directory - KERNEL_STATIC_MEM_START));
-}
-
 static bool IsMapped(void* frame, PageDirectoryEntry*
         directory) {
-    PageTableEntry* pte = GetPageTableEntryPtr((VirtualAddr) frame, directory);
-    return pte != NULL && pte->present;
+    PageTableEntry pte = GetPte((VirtualAddr) frame, directory);
+    return pte.present;
 }
 
 static void* FindContiguousFreeFrames(uint32_t frames,
@@ -151,9 +169,8 @@ static void* FindContiguousFreeFrames(uint32_t frames,
 }
 
 static void UnmapFrame(void* virtual, PageDirectoryEntry* directory) {
-    PageTableEntry* pte = GetPageTableEntryPtr((VirtualAddr) virtual,
-            directory);
-    pte->present = false;
+    PageTableEntry pte = { 0 };
+    SetPte((VirtualAddr) virtual, directory, pte);
 }
 
 void X86PageFaultHandler(InterruptedCpuState* cpu_state) {
@@ -167,8 +184,41 @@ void X86PageFaultHandler(InterruptedCpuState* cpu_state) {
     exit(1);
 }
 
+static void* AllocateMap(void* phys) {
+    void* virt = FindContiguousFreeFrames(1, kernel_page_directory, true);
+    MapFrame(virt, phys, true, true, false, kernel_page_directory);
+    return virt;
+}
+
+static inline void SwitchPageDirectory(PageDirectoryEntry* directory) {
+    current_page_directory = directory;
+    if(directory == kernel_page_directory) {
+        __asm volatile("movl %d0, %%cr3" : : "a" ((void*) kernel_page_directory - KERNEL_STATIC_MEM_START));
+    } else {
+        VirtualAddr vaddr = (VirtualAddr)(void*) directory;
+        PageTableEntry pte = kernel_page_table[vaddr.page.directory_entry * 1024 + vaddr.page.table_entry];
+        uint32_t cr3 = pte.page_frame_addr << 12;
+        __asm volatile("movl %d0, %%cr3" : : "a" (cr3));
+    }
+}
+
+__attribute__((unused)) static PageDirectoryEntry* MapProcess(uint32_t frames, void* k_base) {
+    void* phys = PhysAllocateFrame();
+    PageDirectoryEntry* dir = AllocateMap(phys);
+    memset(dir, 0, 1024 * sizeof(PageDirectoryEntry));
+    for(uint32_t i = 0; i < frames; i++) {
+        PageTableEntry pte = GetPte((VirtualAddr)(k_base + i * FRAME_SIZE), kernel_page_directory);
+        pte.writable = true;
+        pte.user = true;
+        SetPte((VirtualAddr)(USER_PROCESS_BASE + i * FRAME_SIZE), dir, pte);
+    }
+    return dir;
+}
+
 void X86VirtMemMgrInit() {
     X86RegisterIsrHandler(14, X86PageFaultHandler);
+    memset(kernel_page_directory, 0, 1024 * sizeof(PageDirectoryEntry));
+    memset(kernel_page_table, 0, 1048576 * sizeof(PageTableEntry));
     for(size_t i = 0; i < 1024; i++) {
         PageDirectoryEntry* entry = &kernel_page_directory[i];
         memset(entry, 0, sizeof(*entry));
@@ -179,9 +229,8 @@ void X86VirtMemMgrInit() {
         entry->present = true;
         entry->page_table_addr = ((uint32_t) &kernel_page_table[i * 1024] - (uint32_t) KERNEL_STATIC_MEM_START) >> 12;
     }
-    memset(kernel_page_table, 0, 1048576 * sizeof(PageTableEntry));
     MapRange((void*) 0x1000, (void*) 0x1000, 1048576 / FRAME_SIZE - 1, true, false, false, kernel_page_directory);
-    uint32_t first_kernel_frame = (uint32_t) KERNEL_STATIC_MEM_START & 0xFFFFF000;
+    uint32_t first_kernel_frame = (uint32_t) KERNEL_STATIC_MEM_START & 0xFFC00000;
     uint32_t kernel_len = (uint32_t) KERNEL_STATIC_MEM_END - first_kernel_frame;
     uint32_t kernel_frames = kernel_len / FRAME_SIZE;
     if(kernel_len % FRAME_SIZE) {
@@ -206,6 +255,8 @@ void X86FreeContiguousVirtualFrames(void* base, uint32_t frames) {
     for(uint32_t frame = 0; frame < frames; frame++) {
         uint32_t offset = frame * 0x1000;
         void* addr = base + offset;
+        void* phys = (void*)(GetPte((VirtualAddr) addr, current_page_directory).page_frame_addr << 12);
+        X86PhysFreeFrame(phys);
         UnmapFrame(addr, current_page_directory);
     }
 }

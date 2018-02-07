@@ -13,6 +13,7 @@
 // If defined, the first disk detected is assigned the index 0, otherwise 1
 // #define DISK_INDICES_START_FROM_ZERO
 
+
 /* Debugging */
 
 // If defined, starts a GDB stub at the first COM port in the debugging version.
@@ -28,3 +29,9 @@
 // If defined, defines the maximum amount of send attempts by the GDB stub.
 // Otherwise the amount of attempts is unlimited.
 #define GDB_MAX_SEND_ATTEMPTS 3
+
+
+/* User space */
+
+// Defines the base address user processes are loaded at.
+#define USER_PROCESS_BASE ((void*) 0x00100000)

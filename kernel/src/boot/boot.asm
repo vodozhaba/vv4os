@@ -71,7 +71,7 @@ Use32
     extern _KERNEL_STATIC_MEM_END
     mov eax, _KERNEL_STATIC_MEM_END
     mov edx, _KERNEL_STATIC_MEM_START
-    and edx, 0xFFFC0000 ; 4MiB alignment
+    and edx, 0xFFC00000 ; 4MiB alignment
     sub eax, edx
     xor edx, edx
     mov ecx, 0x400000

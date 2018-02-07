@@ -21,12 +21,12 @@ static uint8_t bitmap_data[BITMAP_SIZE(BITMAP_LEN, 0)];
 void X86PhysMemMgrInit(size_t ram_size) {
     bitmap.start = bitmap_data;
     bitmap.len = ram_size / FRAME_SIZE;
-    uint32_t kernel_len = ((uint32_t) KERNEL_STATIC_MEM_END - ((uint32_t) KERNEL_STATIC_MEM_START & 0xFFFFF000));
+    uint32_t kernel_len = ((uint32_t) KERNEL_STATIC_MEM_END - ((uint32_t) KERNEL_STATIC_MEM_START & 0xFFC00000));
     uint32_t kernel_frames = kernel_len / FRAME_SIZE;
     if(kernel_len % FRAME_SIZE) {
         kernel_frames++;
     }
-    bitmap.dead_zone = kernel_frames;
+    bitmap.dead_zone = kernel_frames + 1;
 }
 
 void* X86PhysAllocateFrame() {
