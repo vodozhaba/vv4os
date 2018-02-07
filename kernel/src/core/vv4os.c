@@ -42,43 +42,51 @@ void main(MultibootInformation* mi) {
     size_t conf_size = conf.mod_end - conf.mod_start;
     memcpy(config, (void*) conf.mod_start, conf_size > MAX_CONF_SIZE ? MAX_CONF_SIZE : conf_size);
     VgaTerminalInit();
-    printf("Initialized VGA terminal\n");
     #if defined(DEBUG)
     printf("Kernel loaded at 0x%X - 0x%X\n", KERNEL_STATIC_MEM_START, KERNEL_STATIC_MEM_END);
     #endif
+    available_ram = (mi->mem_upper + 1024) << 10;
+    printf("Detected %dMiB of RAM\n", available_ram / 1048576);
     if(mi->mods_count != 1) {
         VgaTerminalSwitchColorScheme(err_color_scheme);
         printf("Something's wrong with the boot modules. Aborting");
         exit(1);
     }
+    printf("Initializing descriptor tables...");
     DescTablesInit();
-    printf("Initialized processor descriptor tables\n");
+    printf(" OK\n");
+    printf("Initializing UART (baudrate %d)...", UART_DEFAULT_FREQ);
     UartInit(UART_DEFAULT_FREQ);
-    printf("Initialized UART (baudrate %d)\n", UART_DEFAULT_FREQ);
-    available_ram = (mi->mem_upper + 1024) << 10;
-    printf("Detected %dMiB of RAM\n", available_ram / 1048576);
+    printf(" OK\n");
+    printf("Initializing physical memory manager...");
     PhysMemMgrInit(available_ram);
-    printf("Initialized physical memory manager\n");
+    printf(" OK\n");
+    printf("Initializing virtual memory manager...");
     VirtMemMgrInit();
-    printf("Initialized virtual memory manager\n");
+    printf(" OK\n");
 #if defined(DEBUG)
 #if defined(UART_DEBUGGING)
     printf("This build supports debugging over UART.\n");
 #endif
     GdbStubInit();
 #endif
+    printf("Initializing I/O port manager...");
+    printf(" OK\n");
     IoPortMgrInit();
-    printf("Initialized the I/O port manager\n");
+    printf("Initializing PCI...");
     PciInit();
-    printf("Initialized PCI driver\n");
+    printf(" OK\n");
+    printf("Parsing boot.cfg...");
     if(ParseConfig())
-        printf("Parsed the boot config successfully\n");
+        printf(" OK\n");
     else {
         VgaTerminalSwitchColorScheme(err_color_scheme);
-        printf("Cannot parse the boot config. Is there a valid /sys/vv4os/boot.cfg?\n");
+        printf(" ERROR. Is there a valid /sys/vv4os/boot.cfg?\n");
         exit(1);
     }
+    printf("Initializing disk subsystem...");
     DiskSubsystemInit();
-    printf("Initialized the disk subsystem\n");
+    printf(" OK\n");
+    printf("Successful boot-up.\n");
     while(true);
 }
