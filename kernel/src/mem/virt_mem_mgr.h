@@ -13,6 +13,7 @@
 void X86VirtMemMgrInit();
 void* X86AllocateContiguousVirtualFrames(uint32_t frames, bool kernel);
 void X86FreeContiguousVirtualFrames(void* base, uint32_t frames);
+void* X86CreateAddressSpace(void* k_base, size_t frames);
 
 #if !defined(__X86__)
 #error "Cannot determine target architecture"
@@ -33,5 +34,11 @@ static inline void* AllocateContiguousVirtualFrames(size_t frames, bool kernel) 
 static inline void FreeContiguousVirtualFrames(void* base, size_t frames) {
 #if defined(__X86__)
     return X86FreeContiguousVirtualFrames(base, frames);
+#endif
+}
+
+static inline void* CreateAddressSpace(void* k_base, size_t frames) {
+#if defined(__X86__)
+    return X86CreateAddressSpace(k_base, frames);
 #endif
 }

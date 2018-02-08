@@ -202,7 +202,7 @@ static inline void SwitchPageDirectory(PageDirectoryEntry* directory) {
     }
 }
 
-__attribute__((unused)) static PageDirectoryEntry* MapProcess(uint32_t frames, void* k_base) {
+static PageDirectoryEntry* MapProcess(void* k_base, uint32_t frames) {
     void* phys = PhysAllocateFrame();
     PageDirectoryEntry* dir = AllocateMap(phys);
     memset(dir, 0, 1024 * sizeof(PageDirectoryEntry));
@@ -259,4 +259,12 @@ void X86FreeContiguousVirtualFrames(void* base, uint32_t frames) {
         X86PhysFreeFrame(phys);
         UnmapFrame(addr, current_page_directory);
     }
+}
+
+void* X86CreateAddressSpace(void* k_base, size_t frames) {
+    PageDirectoryEntry* ret = MapProcess(k_base, frames);
+    for(size_t i = 0; i < frames; i++) {
+        UnmapFrame(k_base + i * FRAME_SIZE, kernel_page_directory);
+    }
+    return ret;
 }
