@@ -189,8 +189,7 @@ static void* AllocateMap(void* phys) {
     MapFrame(virt, phys, true, true, false, kernel_page_directory);
     return virt;
 }
-
-static inline void SwitchPageDirectory(PageDirectoryEntry* directory) {
+void X86SwitchPageDirectory(PageDirectoryEntry* directory) {
     current_page_directory = directory;
     if(directory == kernel_page_directory) {
         __asm volatile("movl %d0, %%cr3" : : "a" ((void*) kernel_page_directory - KERNEL_STATIC_MEM_START));
@@ -211,6 +210,10 @@ static PageDirectoryEntry* MapProcess(void* k_base, uint32_t frames) {
         pte.writable = true;
         pte.user = true;
         SetPte((VirtualAddr)(USER_PROCESS_BASE + i * FRAME_SIZE), dir, pte);
+    }
+    uint32_t first_kernel_pde = (uint32_t) KERNEL_STATIC_MEM_START >> 22;
+    for(size_t i = first_kernel_pde; i < 1024; i++) {
+        dir[i] = kernel_page_directory[i];
     }
     return dir;
 }
@@ -237,7 +240,7 @@ void X86VirtMemMgrInit() {
         kernel_frames++;
     }
     MapRange((void*) first_kernel_frame + 0x1000, (void*) 0x1000, kernel_frames, true, true, false, kernel_page_directory);
-    SwitchPageDirectory(kernel_page_directory);
+    X86SwitchPageDirectory(kernel_page_directory);
 }
 
 void* X86AllocateContiguousVirtualFrames(uint32_t frames, bool kernel) {

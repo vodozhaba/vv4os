@@ -19,5 +19,7 @@
 	    mov fs, ax
 	    mov gs, ax
 	    mov ss, ax
+		mov ax, 0x28
+		ltr ax
  	    leave
  	    ret

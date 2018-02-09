@@ -7,6 +7,9 @@
 // Purpose:    Allows working with x86 Global Descriptor Table.
 
 #include "gdt_x86.h"
+#include <stdlib.h>
+
+#define SCHED_STACK_SIZE 16384
 
 #define GDT_ENTRY_ACCESS_RO_DATA_RING0                  0x90
 #define GDT_ENTRY_ACCESS_RW_DATA_RING0                  0x92
@@ -47,6 +50,14 @@
 #define GDT_ENTRY_GRANULARITY_PAGE_32_BIT               0xC0
 
 typedef struct {
+    uint32_t unused_1;
+    uint32_t esp0;
+    uint16_t ss0;
+    uint16_t unused_2[46];
+    uint16_t iopb;
+} __attribute__((packed)) Tss;
+
+typedef struct {
     uint16_t limit_low;
     uint32_t base_low : 24;
     uint8_t access_byte;
@@ -63,6 +74,8 @@ extern void X86SetGdtr(Gdtr* gdtr);
 
 static GdtEntry gdt[8192];
 static Gdtr gdtr;
+
+static Tss tss = { 0 };
 
 static void UpdateGdt(GdtEntry* gdt, uint16_t entries) {
     gdtr.base = (uint32_t) gdt;
@@ -91,5 +104,11 @@ void X86GdtInit() {
             GDT_ENTRY_GRANULARITY_PAGE_32_BIT);
     SetGdtEntry(4, 0, 0xFFFFF, GDT_ENTRY_ACCESS_RW_DATA_RING3,
             GDT_ENTRY_GRANULARITY_PAGE_32_BIT);
-    UpdateGdt(gdt, 5);
+    __asm volatile("pushw %%ss\n\tpopw %0" : "=a" (tss.ss0));
+    void* stack = malloc(SCHED_STACK_SIZE);
+    memset(&tss, 0, sizeof(tss));
+    tss.esp0 = (uint32_t) stack;
+    tss.iopb = sizeof(tss);
+    SetGdtEntry(5, (uint32_t) &tss, sizeof(tss), 0x89, GDT_ENTRY_GRANULARITY_PAGE_32_BIT);
+    UpdateGdt(gdt, 6);
 }
