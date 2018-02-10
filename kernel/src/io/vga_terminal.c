@@ -16,7 +16,7 @@ static const uint8_t STD_FG_COLOR = VGA_COLOR_LIGHT(VGA_COLOR_CYAN),
         STD_BG_COLOR = VGA_COLOR_BLACK;
 
 static VgaColorScheme current_color_scheme;
-static volatile VgaEntry* vga_buffer = (VgaEntry*) 0xB8000;
+static volatile VgaEntry* vga_buffer = (VgaEntry*) 0xC00B8000;
 static unsigned int current_x = 0, current_y = 0;
 
 static void SetEntryAt(unsigned int x, unsigned int y, VgaEntry entry) {
