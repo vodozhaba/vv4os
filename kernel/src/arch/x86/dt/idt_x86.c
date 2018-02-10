@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "core/config.h"
 #include "idt_x86.h"
 #include "io/ports.h"
 
@@ -307,6 +308,8 @@ extern void X86SoftIntFDh();
 extern void X86SoftIntFEh();
 extern void X86SoftIntFFh();
 
+extern void X86Syscall();
+
 extern void X86SetIdtr(Idtr* idtr);
 
 static InterruptHandler isr_handlers[32];
@@ -357,6 +360,11 @@ void X86IrqHandler(InterruptedCpuState state) {
         return;
     }
     PortWrite8(0x20, 0x20);
+}
+
+void X86SyscallHandler(__attribute__((unused)) InterruptedCpuState state) {
+    printf("SYSCALL\n");
+    while(1);
 }
 
 void X86IdtInit() {
@@ -620,6 +628,8 @@ void X86IdtInit() {
     RegisterInterrupt(0xFD, X86SoftIntFDh, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
     RegisterInterrupt(0xFE, X86SoftIntFEh, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
     RegisterInterrupt(0xFF, X86SoftIntFFh, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
+
+    RegisterInterrupt(USER_SYSCALL_INTERRUPT, X86Syscall, IDT_ENTRY_TYPE_INTERRUPT_32_RING3);
 
     // Remap master PIC
     PortWrite8(0x20, 0x11);

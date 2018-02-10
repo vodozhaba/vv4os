@@ -350,7 +350,7 @@ Use32
 	    add esp, 8
 	    iret
 
-	    X86IrqCommon:
+	X86IrqCommon:
 	    pushad
 	    xor eax, eax
 	    mov ax, ds
@@ -371,4 +371,30 @@ Use32
 	    add esp, 8
 	    sti
 	    iret
+
+    global X86Syscall
+    X86Syscall:
+ 	    cli
+ 	    push dword 0
+ 	    push dword 0
+	    pushad
+	    xor eax, eax
+	    mov ax, ds
+	    push eax
+	    mov ax, 0x10
+	    mov ds, ax
+	    mov es, ax
+	    mov fs, ax
+	    mov gs, ax
+	    extern X86SyscallHandler
+	    call X86SyscallHandler
+	    pop eax
+	    mov ds, ax
+	    mov es, ax
+	    mov fs, ax
+	    mov gs, ax
+	    popa
+	    add esp, 8
+	    iret
+
 

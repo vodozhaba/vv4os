@@ -35,3 +35,6 @@
 
 // Defines the base address user processes are loaded at.
 #define USER_PROCESS_BASE ((void*) 0x00100000)
+
+// Defines the interrupt which can be called by user-space code to interact with the kernel
+#define USER_SYSCALL_INTERRUPT 0x80
