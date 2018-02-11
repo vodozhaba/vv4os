@@ -12,32 +12,46 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "io/disk/file.h"
 #include "io/vga_terminal.h"
+
+FileDescriptor _stdout = { .traverse_op = FileTraverseOpStub, .read_op = FileAccessOpStub, .write_op = StdoutWriteOp, .local_id = 1 };
+FileDescriptor* stdout = &_stdout;
+
+FileDescriptor _stderr = { .traverse_op = FileTraverseOpStub, .read_op = FileAccessOpStub, .write_op = StderrWriteOp, .local_id = 1 };
+FileDescriptor* stderr = &_stderr;
+
+size_t StdoutWriteOp(__attribute__((unused)) FileDescriptor* file, size_t size, const void* buf) {
+    VgaTerminalSwitchColorScheme(default_color_scheme);
+    const char* str = buf;
+    for(size_t i = 0; i < size; i++) {
+        putchar(str[i]);
+    }
+    return size;
+}
+
+size_t StderrWriteOp(__attribute__((unused)) FileDescriptor* file, size_t size, const void* buf) {
+    VgaTerminalSwitchColorScheme(err_color_scheme);
+    const char* str = buf;
+    for(size_t i = 0; i < size; i++) {
+        putchar(str[i]);
+    }
+    return size;
+}
 
 int putchar(int character) {
     VgaTerminalPut((char) character);
     return character;
 }
 
-int _puts(const char* s) {
-    for(size_t i = 0; s[i] != 0x00; ++i) {
-        int res = putchar(s[i]);
-        if(res != s[i])
-            return -1;
-    }
-    return 0;
-}
-
 int isspace (int c) {
     return strchr(" \t\n\v\f\r", c) != NULL;
 }
 
-int printf(const char* fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
+int vfprintf(FileDescriptor* file, const char* fmt, va_list args) {
     for(size_t i = 0; fmt[i]; i++) {
         if(fmt[i] != '%') {
-            putchar(fmt[i]);
+            file->write_op(file, 1, &fmt[i]);
             continue;
         }
         size_t width = 0;
@@ -62,7 +76,7 @@ int printf(const char* fmt, ...) {
     	    goto next;
         }
         case '%': {
-            putchar('%');
+            file->write_op(file, 1, "%");
             break;
         }
         case 'd':
@@ -73,10 +87,10 @@ int printf(const char* fmt, ...) {
             size_t len = strlen(str);
             if(len < width) {
                 for(size_t k = 0; k < width - len; k++) {
-            	    putchar(pad_c);
+                    file->write_op(file, 1, &pad_c);
                 }
             }
-            puts(str);
+            file->write_op(file, len, str);
             break;
         }
         case 'u': {
@@ -86,10 +100,10 @@ int printf(const char* fmt, ...) {
             size_t len = strlen(str);
             if(len < width) {
                 for(size_t k = 0; k < width - len; k++) {
-            	    putchar(pad_c);
+                    file->write_op(file, 1, &pad_c);
                 }
             }
-            puts(str);
+            file->write_op(file, len, str);
             break;
         }
         case 'o': {
@@ -99,10 +113,10 @@ int printf(const char* fmt, ...) {
             size_t len = strlen(str);
             if(len < width) {
                 for(size_t k = 0; k < width - len; k++) {
-            	    putchar(pad_c);
+                    file->write_op(file, 1, &pad_c);
                 }
             }
-            puts(str);
+            file->write_op(file, len, str);
             break;
         }
         case 'x': {
@@ -112,10 +126,10 @@ int printf(const char* fmt, ...) {
             size_t len = strlen(str);
             if(len < width) {
                 for(size_t k = 0; k < width - len; k++) {
-            	    putchar(pad_c);
+                    file->write_op(file, 1, &pad_c);
                 }
             }
-            puts(str);
+            file->write_op(file, len, str);
             break;
         }
         case 'X': {
@@ -125,15 +139,15 @@ int printf(const char* fmt, ...) {
             size_t len = strlen(str);
             if(len < width) {
                 for(size_t k = 0; k < width - len; k++) {
-            	    putchar(pad_c);
+                    file->write_op(file, 1, &pad_c);
                 }
             }
-            puts(str);
+            file->write_op(file, len, str);
             break;
         }
         case 'c': {
             char arg = va_arg(args, int);
-            putchar(arg);
+                    file->write_op(file, 1, &arg);
             break;
         }
         case 's': {
@@ -141,17 +155,32 @@ int printf(const char* fmt, ...) {
             size_t len = strlen(str);
             if(len < width) {
                 for(size_t k = 0; k < width - len; k++) {
-            	    putchar(pad_c);
+                    file->write_op(file, 1, &pad_c);
                 }
             }
-            puts(str);
+            file->write_op(file, len, str);
             break;
         }
     }
     }
-    va_end(args);
     /* TODO add valid return value */
     return 0;
+}
+
+int fprintf(FileDescriptor* file,  const char* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    int ret = vfprintf(file, fmt, args);
+    va_end(args);
+    return ret;
+}
+
+int printf(const char* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    int ret = vfprintf(stdout, fmt, args);
+    va_end(args);
+    return ret;
 }
 
 int sprintf(char* dest, const char* fmt, ...) {

@@ -48,8 +48,7 @@ void main(MultibootInformation* mi) {
     available_ram = (mi->mem_upper + 1024) << 10;
     printf("Detected %dMiB of RAM\n", available_ram / 1048576);
     if(mi->mods_count != 1) {
-        VgaTerminalSwitchColorScheme(err_color_scheme);
-        printf("Something's wrong with the boot modules. Aborting");
+        fprintf(stderr, "Something's wrong with the boot modules. Aborting");
         exit(1);
     }
     printf("Initializing descriptor tables...");
@@ -80,8 +79,7 @@ void main(MultibootInformation* mi) {
     if(ParseConfig())
         printf(" OK\n");
     else {
-        VgaTerminalSwitchColorScheme(err_color_scheme);
-        printf(" ERROR. Is there a valid /sys/vv4os/boot.cfg?\n");
+        fprintf(stderr, " ERROR. Is there a valid /sys/vv4os/boot.cfg?\n");
         exit(1);
     }
     printf("Initializing disk subsystem...");

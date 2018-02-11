@@ -174,13 +174,10 @@ static void UnmapFrame(void* virtual, PageDirectoryEntry* directory) {
 }
 
 void X86PageFaultHandler(InterruptedCpuState* cpu_state) {
-    VgaTerminalSwitchColorScheme(err_color_scheme);
-    printf(
-"A page fault (error code %d) has occured. It's a fatal error. Please, write down\n"
+    fprintf(stderr,
+"\nA page fault (error code %d) has occured. It's a fatal error. Please, write down\n"
 "this message and what you were doing when the error occured and submit an\n"
-"issue at ", cpu_state->error_code);
-    VgaTerminalSwitchColorScheme(link_color_scheme);
-    printf("https://github.com/vodozhaba/vv4os/issues/\n");
+"issue at https://github.com/vodozhaba/vv4os/issues/.\n", cpu_state->error_code);
     exit(1);
 }
 

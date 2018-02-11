@@ -105,7 +105,7 @@ void exit(int status) {
                 .background = VGA_COLOR_BLACK
         };
         VgaTerminalSwitchColorScheme(err_color_scheme);
-        printf("A fatal error has occured, exiting with error code %d\n",
+        fprintf(stderr, "A fatal error has occured, exiting with error code %d\n",
                 status);
     }
     __asm volatile("cli");

@@ -28,6 +28,10 @@ typedef struct {
     VgaColorScheme color_scheme;
 } __attribute__((packed)) VgaEntry;
 
+static const VgaColorScheme default_color_scheme = {
+        .foreground = VGA_COLOR_LIGHT(VGA_COLOR_CYAN),
+        .background = VGA_COLOR_BLACK
+};
 static const VgaColorScheme err_color_scheme = {
         .foreground = VGA_COLOR_LIGHT(VGA_COLOR_RED),
         .background = VGA_COLOR_BLACK

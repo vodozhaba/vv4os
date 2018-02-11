@@ -13,6 +13,7 @@ typedef struct FileDescriptor FileDescriptor;
 
 typedef FileDescriptor* (*FileTraverseOp)(FileDescriptor* parent, char* name);
 typedef size_t (*FileReadOp)(FileDescriptor* file, size_t size, void* buf);
+typedef size_t (*FileWriteOp)(FileDescriptor* file, size_t size, const void* buf);
 
 struct Volume;
 typedef struct Volume Volume;
@@ -29,5 +30,11 @@ struct FileDescriptor {
     void* data;
     FileTraverseOp traverse_op;
     FileReadOp read_op;
+    FileWriteOp write_op;
+    uint32_t local_id;
     FileDescriptorType type;
+    struct FileDescriptor* next;
 };
+
+size_t FileAccessOpStub();
+FileDescriptor* FileTraverseOpStub();

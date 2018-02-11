@@ -6,13 +6,17 @@
 #pragma once
 
 #include <stdarg.h>
+#include "io/disk/file.h"
 
-#define puts(s) \
-    _Pragma("message \"puts() implementation does NOT append '\\\\n'\""); \
-    _puts(s);
+extern FileDescriptor* stdout;
+extern FileDescriptor* stderr;
+
+size_t StdoutWriteOp(FileDescriptor* file, size_t size, const void* buf);
+size_t StderrWriteOp(FileDescriptor* file, size_t size, const void* buf);
 
 int putchar(int character);
 int _puts(const char* s);
 int isspace (int c);
+int fprintf(FileDescriptor* file,  const char* fmt, ...);
 int printf(const char* fmt, ...);
 int sprintf(char* dest, const char* fmt, ...);

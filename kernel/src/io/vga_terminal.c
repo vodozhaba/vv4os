@@ -12,8 +12,6 @@
 #include "ports.h"
 
 static const unsigned int VGA_BUFFER_HEIGHT = 25, VGA_BUFFER_WIDTH = 80;
-static const uint8_t STD_FG_COLOR = VGA_COLOR_LIGHT(VGA_COLOR_CYAN),
-        STD_BG_COLOR = VGA_COLOR_BLACK;
 
 static VgaColorScheme current_color_scheme;
 static volatile VgaEntry* vga_buffer = (VgaEntry*) 0xC00B8000;
@@ -78,8 +76,7 @@ static void AdvanceCursor(int n) {
 
 void VgaTerminalInit() {
     MoveCursorAt(0, 0);
-    current_color_scheme.foreground = STD_FG_COLOR;
-    current_color_scheme.background = STD_BG_COLOR;
+    VgaTerminalSwitchColorScheme(default_color_scheme);
     VgaEntry whitespace = ConstructVgaEntry(' ', current_color_scheme);
     for (unsigned int y = 0; y < VGA_BUFFER_HEIGHT; y++) {
         for (unsigned int x = 0; x < VGA_BUFFER_WIDTH; x++) {
