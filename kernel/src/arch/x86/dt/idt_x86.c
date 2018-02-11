@@ -12,6 +12,7 @@
 #include "core/config.h"
 #include "idt_x86.h"
 #include "io/ports.h"
+#include "user/syscall.h"
 
 typedef struct {
     uint16_t size;
@@ -362,9 +363,8 @@ void X86IrqHandler(InterruptedCpuState state) {
     PortWrite8(0x20, 0x20);
 }
 
-void X86SyscallHandler(__attribute__((unused)) InterruptedCpuState state) {
-    printf("SYSCALL\n");
-    while(1);
+void X86SyscallHandler(volatile InterruptedCpuState state) {
+    state.eax = Syscall(state.eax, state.ebx, state.ecx, state.edx);
 }
 
 void X86IdtInit() {

@@ -8,6 +8,7 @@
 #include <stdarg.h>
 #include "io/disk/file.h"
 
+extern FileDescriptor* stdin;
 extern FileDescriptor* stdout;
 extern FileDescriptor* stderr;
 

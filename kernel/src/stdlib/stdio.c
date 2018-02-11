@@ -15,10 +15,13 @@
 #include "io/disk/file.h"
 #include "io/vga_terminal.h"
 
-FileDescriptor _stdout = { .traverse_op = FileTraverseOpStub, .read_op = FileAccessOpStub, .write_op = StdoutWriteOp, .local_id = 1 };
+FileDescriptor _stdin = { .traverse_op = FileTraverseOpStub, .read_op = FileAccessOpStub, .write_op = FileAccessOpStub };
+FileDescriptor* stdin = &_stdin;
+
+FileDescriptor _stdout = { .traverse_op = FileTraverseOpStub, .read_op = FileAccessOpStub, .write_op = StdoutWriteOp };
 FileDescriptor* stdout = &_stdout;
 
-FileDescriptor _stderr = { .traverse_op = FileTraverseOpStub, .read_op = FileAccessOpStub, .write_op = StderrWriteOp, .local_id = 1 };
+FileDescriptor _stderr = { .traverse_op = FileTraverseOpStub, .read_op = FileAccessOpStub, .write_op = StderrWriteOp };
 FileDescriptor* stderr = &_stderr;
 
 size_t StdoutWriteOp(__attribute__((unused)) FileDescriptor* file, size_t size, const void* buf) {
