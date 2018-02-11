@@ -18,5 +18,6 @@ int putchar(int character);
 int _puts(const char* s);
 int isspace (int c);
 int fprintf(FileDescriptor* file,  const char* fmt, ...);
+int vfprintf(FileDescriptor* file,  const char* fmt, va_list argss);
 int printf(const char* fmt, ...);
 int sprintf(char* dest, const char* fmt, ...);
