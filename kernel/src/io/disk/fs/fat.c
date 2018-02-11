@@ -183,6 +183,9 @@ static uint32_t NextCluster(Volume* volume, uint32_t cluster) {
 }
 
 size_t Fat32ReadOp(FileDescriptor* file, size_t size, void* buf) {
+    if(file->type != FD_TYPE_FILE) {
+        return 0;
+    }
     FatVolumeInternalData* fvid = file->volume->data;
     FatFileInternalData* ffid = file->data;
     void* cluster_buf = malloc(fvid->bytes_per_cluster);
@@ -327,6 +330,8 @@ static Volume* Fat32MountVolume(Volume* volume) {
     FileDescriptor* file = malloc(sizeof(*file));
     file->volume = volume;
     file->traverse_op = Fat32TraverseOp;
+    file->read_op = Fat32ReadOp;
+    file->write_op = FileAccessOpStub;
     file->type = FD_TYPE_DIRECTORY;
     FatFileInternalData* file_data = malloc(sizeof(*file_data));
     file_data->first_cluster = volume_data->br.ebr.fat32.root_cluster_number;
