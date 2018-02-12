@@ -16,6 +16,7 @@ typedef struct Process {
 } Process;
 
 void SchedulerTick();
+void RemoveProcess(uint32_t pid);
 Process* GetProcess(uint32_t pid);
 uint32_t UserProcessLoad(FileDescriptor* file, FileDescriptor* stdin, FileDescriptor* stdout, FileDescriptor* stderr);
 uint32_t UserProcessCurrent();

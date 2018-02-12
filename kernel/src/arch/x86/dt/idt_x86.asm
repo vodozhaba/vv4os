@@ -374,7 +374,6 @@ Use32
 
     global X86Syscall
     X86Syscall:
- 	    cli
  	    push dword 0
  	    push dword 0
 	    pushad
@@ -386,6 +385,8 @@ Use32
 	    mov es, ax
 	    mov fs, ax
 	    mov gs, ax
+        push 0x0202
+        popf
 	    extern X86SyscallHandler
 	    call X86SyscallHandler
 	    pop eax

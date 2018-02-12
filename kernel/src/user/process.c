@@ -16,12 +16,17 @@
 
 void X86InitProcess(Process* process);
 void X86RestoreProcess(Process* process);
+void X86HaltProcess();
 
 static uint32_t last_pid = 0;
 static Process* head = NULL;
 static Process* current = NULL;
 
 void SchedulerTick() {
+    if(!head) {
+        printf("No more processes in the system. Halt.\n");
+        exit(0);
+    }
     if(!current || !current->next) {
         current = head;
     } else {
@@ -29,6 +34,19 @@ void SchedulerTick() {
     }
     if(current) {
         X86RestoreProcess(current);
+    }
+}
+
+
+void RemoveProcess(uint32_t pid) {
+    if(head->pid == pid) {
+        head = head->next;
+        return;
+    }
+    Process* prev;
+    for(prev = head; prev->next != NULL && prev->next->pid != pid; prev = prev->next);
+    if(prev->next->pid == pid) {
+        prev->next = prev->next->next;
     }
 }
 

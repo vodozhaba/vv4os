@@ -13,6 +13,7 @@
 
 #define FN_CODE_READ 0
 #define FN_CODE_WRITE 1
+#define FN_CODE_EXIT 2
 
 size_t SyscallRead(va_list args) {
     uint32_t local_id = va_arg(args, uint32_t);
@@ -44,6 +45,12 @@ size_t SyscallWrite(va_list args) {
     return file->write_op(file, len, buf);
 }
 
+size_t SyscallExit() {
+    RemoveProcess(UserProcessCurrent());
+    while(1);
+    return 0; // not executed
+}
+
 size_t Syscall(size_t fn_code, ...) {
     va_list args;
     va_start(args, fn_code);
@@ -54,6 +61,9 @@ size_t Syscall(size_t fn_code, ...) {
             break;
         case FN_CODE_WRITE:
             ret = SyscallWrite(args);
+            break;
+        case FN_CODE_EXIT:
+            ret = SyscallExit(args);
             break;
         default:
             ret = -1;

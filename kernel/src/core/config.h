@@ -40,4 +40,4 @@
 #define USER_SYSCALL_INTERRUPT 0x80
 
 // Defines the time slice every process is run for continuously in microsecods
-#define USER_PROCESS_TIME_SLICE_US 200
+#define USER_PROCESS_TIME_SLICE_US 20000
