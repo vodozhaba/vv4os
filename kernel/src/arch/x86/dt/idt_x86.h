@@ -25,9 +25,9 @@ typedef struct {
     uint32_t eflags;
     uint32_t user_esp;
     uint32_t ss;
-} __attribute__((packed)) InterruptedCpuState;
+} __attribute__((packed)) X86CpuState;
 
-typedef void (*InterruptHandler)(InterruptedCpuState*);
+typedef void (*InterruptHandler)(X86CpuState*);
 
 #define IRQ(x) ((x) + 0x20)
 

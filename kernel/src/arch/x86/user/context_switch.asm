@@ -5,24 +5,22 @@
 
 section .text
 Use32
-    global UserlandJump
-    UserlandJump:
+    global X86UserlandJump
+    X86UserlandJump:
         push ebp
         mov ebp, esp
-        mov eax, [ebp+12]
+        mov eax, [ebp+8]
         push eax
         extern X86SwitchPageDirectory
         call X86SwitchPageDirectory
-        mov ax, 0x23
+        lea esp, [ebp+12]
+        pop eax
         mov ds, ax
         mov es, ax
-        mov gs, ax
         mov fs, ax
-        mov eax, esp
-        push 0x23
-        push eax
-        pushf
-        push 0x1B
-        mov eax, [ebp+8]
-        push eax
+        mov gs, ax
+        mov al, 0x20
+        out 0x20, al
+        popad
+        add esp, 8
         iret

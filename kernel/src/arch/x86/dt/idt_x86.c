@@ -12,6 +12,7 @@
 #include "core/config.h"
 #include "idt_x86.h"
 #include "io/ports.h"
+#include "user/process.h"
 #include "user/syscall.h"
 
 typedef struct {
@@ -338,20 +339,20 @@ static void RegisterInterrupt(uint8_t n, void (*handler)(), uint8_t type) {
     __asm volatile("popf");
 }
 
-void X86IsrHandler(__attribute__((unused)) InterruptedCpuState state) {
+void X86IsrHandler(__attribute__((unused)) X86CpuState state) {
     if(isr_handlers[state.interrupt]) {
         isr_handlers[state.interrupt](&state);
     }
 }
 
-void X86SoftIntHandler(__attribute__((unused)) InterruptedCpuState state) {
+void X86SoftIntHandler(__attribute__((unused)) X86CpuState state) {
     uint32_t interrupt = state.interrupt - 0x30;
     if(soft_int_handlers[interrupt]) {
         soft_int_handlers[interrupt](&state);
     }
 }
 
-void X86IrqHandler(InterruptedCpuState state) {
+void X86IrqHandler(X86CpuState state) {
     uint32_t interrupt = state.interrupt - IRQ(0);
     if(irq_handlers[interrupt]) {
         irq_handlers[interrupt](&state);
@@ -363,8 +364,15 @@ void X86IrqHandler(InterruptedCpuState state) {
     PortWrite8(0x20, 0x20);
 }
 
-void X86SyscallHandler(volatile InterruptedCpuState state) {
+void X86SyscallHandler(volatile X86CpuState state) {
     state.eax = Syscall(state.eax, state.ebx, state.ecx, state.edx);
+}
+
+void X86SchedulerTick(X86CpuState* state) {
+    Process* process = GetProcess(UserProcessCurrent());
+    if(process != NULL)
+        memcpy(process->saved_state, state, sizeof(*state));
+    SchedulerTick();
 }
 
 void X86IdtInit() {
@@ -382,6 +390,7 @@ void X86IdtInit() {
     RegisterInterrupt(9, X86Isr9, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
     RegisterInterrupt(10, X86Isr10, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
     RegisterInterrupt(11, X86Isr11, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
+    RegisterInterrupt(31, X86Isr31, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
     RegisterInterrupt(12, X86Isr12, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
     RegisterInterrupt(13, X86Isr13, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
     RegisterInterrupt(14, X86Isr14, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
@@ -401,7 +410,6 @@ void X86IdtInit() {
     RegisterInterrupt(28, X86Isr28, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
     RegisterInterrupt(29, X86Isr29, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
     RegisterInterrupt(30, X86Isr30, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
-    RegisterInterrupt(31, X86Isr31, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
 
     RegisterInterrupt(IRQ(0), X86Irq0, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
     RegisterInterrupt(IRQ(1), X86Irq1, IDT_ENTRY_TYPE_INTERRUPT_32_RING0);
@@ -631,6 +639,8 @@ void X86IdtInit() {
 
     RegisterInterrupt(USER_SYSCALL_INTERRUPT, X86Syscall, IDT_ENTRY_TYPE_INTERRUPT_32_RING3);
 
+    X86RegisterIrqHandler(IRQ(0), X86SchedulerTick);
+
     // Remap master PIC
     PortWrite8(0x20, 0x11);
     PortWrite8(0x21, IRQ(0));
@@ -644,7 +654,10 @@ void X86IdtInit() {
     PortWrite8(0xA1, 0x01);
     PortWrite8(0xA1, 0x00);
 
-    __asm volatile("sti");
+    uint16_t div = 1.193182 * USER_PROCESS_TIME_SLICE_US;
+
+    PortWrite8(0x40, div);
+    PortWrite8(0x40, div >> 8);
 }
 
 void X86RegisterIsrHandler(uint8_t n, InterruptHandler handler) {

@@ -173,7 +173,7 @@ static void UnmapFrame(void* virtual, PageDirectoryEntry* directory) {
     SetPte((VirtualAddr) virtual, directory, pte);
 }
 
-void X86PageFaultHandler(InterruptedCpuState* cpu_state) {
+void X86PageFaultHandler(X86CpuState* cpu_state) {
     fprintf(stderr,
 "\nA page fault (error code %d) has occured. It's a fatal error. Please, write down\n"
 "this message and what you were doing when the error occured and submit an\n"

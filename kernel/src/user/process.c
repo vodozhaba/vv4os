@@ -1,7 +1,7 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-// File:       user/process.h
+// File:       user/process.c
 // Author:     vodozhaba
 // Created on: Feb 08, 2018
 // Purpose:    Works with userland processes.
@@ -14,10 +14,29 @@
 #include "mem/phys_mem_mgr.h"
 #include "mem/virt_mem_mgr.h"
 
-extern void UserlandJump(void* address, void* address_space);
+void X86InitProcess(Process* process);
+void X86RestoreProcess(Process* process);
 
 static uint32_t last_pid = 0;
 static Process* head = NULL;
+static Process* current = NULL;
+
+void SchedulerTick() {
+    if(!current || !current->next) {
+        current = head;
+    } else {
+        current = current->next;
+    }
+    if(current) {
+        X86RestoreProcess(current);
+    }
+}
+
+Process* GetProcess(uint32_t pid) {
+    Process* process;
+    for(process = head; process != NULL && process->pid != pid; process = process->next);
+    return process;
+}
 
 uint32_t UserProcessLoad(FileDescriptor* file, FileDescriptor* stdin, FileDescriptor* stdout, FileDescriptor* stderr) {
     if(last_pid == UINT32_MAX - 1) {
@@ -33,8 +52,6 @@ uint32_t UserProcessLoad(FileDescriptor* file, FileDescriptor* stdin, FileDescri
     Process* process = malloc(sizeof(*process));
     process->address_space = CreateAddressSpace(buf, frames);
     process->pid = ++last_pid;
-    process->next = head;
-    head = process;
     FileDescriptor* l_stdin = malloc(sizeof(*l_stdin));
     memcpy(l_stdin, stdin, sizeof(*l_stdin));
     l_stdin->local_id = 0;
@@ -48,26 +65,25 @@ uint32_t UserProcessLoad(FileDescriptor* file, FileDescriptor* stdin, FileDescri
     l_stdin->next = l_stdout;
     l_stdout->next = l_stderr;
     l_stderr->next = NULL;
-    // Let's pretend this is a scheduler
-    UserlandJump((void*) 0x100000, process->address_space);
+    X86InitProcess(process);
+    process->next = head;
+    head = process;
     return process->pid;
 }
 
 uint32_t UserProcessCurrent() {
-    return last_pid;
+    return current ? current->pid : 0;
 }
 
 FileDescriptor* UserProcessLocalFile(uint32_t pid, uint32_t local_id) {
-    for(Process* process = head; process != NULL; process = process->next) {
-        if(process->pid != pid) {
-            continue;
-        }
-        for(FileDescriptor* file = process->local_files; file != NULL; file = file->next) {
-            if(file->local_id == local_id) {
-                return file;
-            }
-        }
+    Process* process = GetProcess(pid);
+    if(!process) {
         return NULL;
+    }
+    for(FileDescriptor* file = process->local_files; file != NULL; file = file->next) {
+        if(file->local_id == local_id) {
+            return file;
+        }
     }
     return NULL;
 }
