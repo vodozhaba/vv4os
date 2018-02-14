@@ -9,12 +9,13 @@
 #include "vga_terminal.h"
 #include <stddef.h>
 #include <assert.h>
+#include "mem/kernel_mem.h"
 #include "ports.h"
 
 static const unsigned int VGA_BUFFER_HEIGHT = 25, VGA_BUFFER_WIDTH = 80;
 
 static VgaColorScheme current_color_scheme;
-static volatile VgaEntry* vga_buffer = (VgaEntry*) 0xC00B8000;
+static volatile VgaEntry* vga_buffer = (VgaEntry*)(KERNEL_STATIC_MEM_START + 0xB8000);
 static unsigned int current_x = 0, current_y = 0;
 
 static void SetEntryAt(unsigned int x, unsigned int y, VgaEntry entry) {
