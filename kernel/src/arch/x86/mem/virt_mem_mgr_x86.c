@@ -16,6 +16,7 @@
 #include "io/vga_terminal.h"
 #include "mem/kernel_mem.h"
 #include "mem/phys_mem_mgr.h"
+#include "user/process.h"
 
 typedef struct {
     bool present : 1;
@@ -267,4 +268,31 @@ void* X86CreateAddressSpace(void* k_base, size_t frames) {
         UnmapFrame(k_base + i * FRAME_SIZE, kernel_page_directory);
     }
     return ret;
+}
+
+void* X86CreateStack(void* address_space, void* top, size_t size) {
+    PageDirectoryEntry* dir = address_space;
+    uint32_t frames = size / FRAME_SIZE;
+    if(size % FRAME_SIZE) {
+        frames++;
+    }
+    void* bottom = top - frames * FRAME_SIZE;
+    for(uint32_t i = 0; i < frames; i++) {
+        void* phys = PhysAllocateFrame();
+        if(!phys) {
+            return NULL;
+        }
+        MapFrame(bottom + i * FRAME_SIZE, phys, true, true, true, dir);
+    }
+    return (void*)((uint32_t) top & 0xFFFFF000);
+}
+
+void X86RemoveProcess(Process* process) {
+    for(void* frame = NULL; frame < (void*)((uint32_t) KERNEL_STATIC_MEM_START & 0xFFFFF000); frame += 0x1000) {
+        void* phys = (void*)(GetPte((VirtualAddr) frame, process->address_space).page_frame_addr << 12);
+        if(phys) {
+            PhysFreeFrame(phys);
+        }
+        UnmapFrame(frame, process->address_space);
+    }
 }

@@ -11,6 +11,7 @@
 #include "arch/x86/dt/idt_x86.h"
 #include "core/config.h"
 #include "mem/kernel_mem.h"
+#include "mem/virt_mem_mgr.h"
 
 extern void X86UserlandJump(void* address_space, X86CpuState cpu_state);
 
@@ -20,9 +21,9 @@ void X86InitProcess(Process* process) {
     state->ds = 0x23;
     state->eflags = 0x0202;
     state->eip = (uint32_t) USER_PROCESS_BASE;
-    state->esp = (uint32_t) KERNEL_STATIC_MEM_START;
+    state->esp = (uint32_t) X86CreateStack(process->address_space, (void*)((uint32_t) KERNEL_STATIC_MEM_START & 0xFFFFF000), USER_PROCESS_STACK);
     state->ss = 0x23;
-    state->user_esp = (uint32_t) KERNEL_STATIC_MEM_START;
+    state->user_esp = state->esp;
     process->saved_state = state;
 }
 

@@ -14,6 +14,7 @@ void X86VirtMemMgrInit();
 void* X86AllocateContiguousVirtualFrames(uint32_t frames, bool kernel);
 void X86FreeContiguousVirtualFrames(void* base, uint32_t frames);
 void* X86CreateAddressSpace(void* k_base, size_t frames);
+void* X86CreateStack(void* address_space, void* top, size_t size);
 
 #if !defined(__X86__)
 #error "Cannot determine target architecture"

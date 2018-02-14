@@ -41,3 +41,6 @@
 
 // Defines the time slice every process is run for continuously in microsecods
 #define USER_PROCESS_TIME_SLICE_US 50000
+
+// Defines the size of stack user processes and their individual threads are given.
+#define USER_PROCESS_STACK 1048576

@@ -16,7 +16,7 @@
 
 void X86InitProcess(Process* process);
 void X86RestoreProcess(Process* process);
-void X86HaltProcess();
+void X86RemoveProcess(Process* process);
 
 static uint32_t last_pid = 0;
 static Process* head = NULL;
@@ -43,11 +43,17 @@ void RemoveProcess(uint32_t pid) {
         head = head->next;
         return;
     }
+    Process* process = GetProcess(pid);
     Process* prev;
     for(prev = head; prev->next != NULL && prev->next->pid != pid; prev = prev->next);
     if(prev->next->pid == pid) {
         prev->next = prev->next->next;
     }
+    #if defined(__X86__)
+    X86RemoveProcess(process);
+    #else
+    #error "Cannot determine target architecture"
+    #endif
 }
 
 Process* GetProcess(uint32_t pid) {
@@ -83,7 +89,11 @@ uint32_t UserProcessLoad(FileDescriptor* file, FileDescriptor* stdin, FileDescri
     l_stdin->next = l_stdout;
     l_stdout->next = l_stderr;
     l_stderr->next = NULL;
+    #if defined(__X86__)
     X86InitProcess(process);
+    #else
+    #error "Cannot determine target architecture"
+    #endif
     process->next = head;
     head = process;
     return process->pid;
