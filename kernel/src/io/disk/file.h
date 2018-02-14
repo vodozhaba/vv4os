@@ -20,7 +20,8 @@ typedef struct Volume Volume;
 
 typedef enum {
     FD_TYPE_FILE,
-    FD_TYPE_DIRECTORY
+    FD_TYPE_DIRECTORY,
+    FD_TYPE_TTY
 } FileDescriptorType;
 
 struct FileDescriptor {
