@@ -8,12 +8,17 @@
 #include "io/disk/file.h"
 
 typedef struct Process {
-    uint32_t pid;
     void* address_space;
-    void* saved_state;
+    void* last_state;
+    void* kernel_stack;
     FileDescriptor* local_files;
     struct Process* next;
+    uint32_t pid;
 } Process;
+
+void X86InitProcess(Process* process);
+void X86RestoreProcess(Process* process);
+void X86RemoveProcess(Process* process);
 
 void SchedulerTick();
 void RemoveProcess(uint32_t pid);

@@ -14,10 +14,6 @@
 #include "mem/phys_mem_mgr.h"
 #include "mem/virt_mem_mgr.h"
 
-void X86InitProcess(Process* process);
-void X86RestoreProcess(Process* process);
-void X86RemoveProcess(Process* process);
-
 static uint32_t last_pid = 0;
 static Process* head = NULL;
 static Process* current = NULL;

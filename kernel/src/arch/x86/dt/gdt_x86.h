@@ -14,4 +14,5 @@ typedef struct {
     uint16_t index : 13;
 } __attribute__((packed)) GdtSelector;
 
+void X86SetKernelStack(void* stack);
 void X86GdtInit();

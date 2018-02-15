@@ -93,6 +93,10 @@ static void SetGdtEntry(uint16_t n, uint32_t base, uint32_t limit, uint8_t
     gdt[n].granularity |= (limit >> 16) & 0x0F;
 }
 
+void X86SetKernelStack(void* stack) {
+    tss.esp0 = (uint32_t) stack;
+}
+
 void X86GdtInit() {
     GdtEntry null_entry = { };
     gdt[0] = null_entry;
@@ -105,9 +109,7 @@ void X86GdtInit() {
     SetGdtEntry(4, 0, 0xFFFFF, GDT_ENTRY_ACCESS_RW_DATA_RING3,
             GDT_ENTRY_GRANULARITY_PAGE_32_BIT);
     __asm volatile("pushw %%ss\n\tpopw %0" : "=a" (tss.ss0));
-    void* stack = malloc(SCHED_STACK_SIZE) + SCHED_STACK_SIZE;
     memset(&tss, 0, sizeof(tss));
-    tss.esp0 = (uint32_t) stack;
     tss.ss0 = 0x10;
     tss.iopb = sizeof(tss);
     SetGdtEntry(5, (uint32_t) &tss, sizeof(tss), 0x89, GDT_ENTRY_GRANULARITY_PAGE_32_BIT);

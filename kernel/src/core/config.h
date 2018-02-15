@@ -40,7 +40,10 @@
 #define USER_SYSCALL_INTERRUPT 0x80
 
 // Defines the time slice every process is run for continuously in microsecods
-#define USER_PROCESS_TIME_SLICE_US 50000
+#define USER_PROCESS_TIME_SLICE_US 2000
 
 // Defines the size of stack user processes and their individual threads are given.
 #define USER_PROCESS_STACK 1048576
+
+// Defines the size of stack kernel is given to process syscalls from user processes
+#define KERNEL_SYSCALL_STACK 16384

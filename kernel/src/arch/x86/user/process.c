@@ -8,6 +8,7 @@
 
 #include "user/process.h"
 #include <stdlib.h>
+#include "arch/x86/dt/gdt_x86.h"
 #include "arch/x86/dt/idt_x86.h"
 #include "core/config.h"
 #include "mem/kernel_mem.h"
@@ -24,10 +25,12 @@ void X86InitProcess(Process* process) {
     state->esp = (uint32_t) X86CreateStack(process->address_space, (void*)((uint32_t) KERNEL_STATIC_MEM_START & 0xFFFFF000), USER_PROCESS_STACK);
     state->ss = 0x23;
     state->user_esp = state->esp;
-    process->saved_state = state;
+    process->last_state = state;
+    process->kernel_stack = malloc(KERNEL_SYSCALL_STACK) + KERNEL_SYSCALL_STACK;
 }
 
 void X86RestoreProcess(Process* process) {
-    X86CpuState* cpu_state = process->saved_state;
+    X86CpuState* cpu_state = process->last_state;
+    X86SetKernelStack(process->kernel_stack);
     X86UserlandJump(process->address_space, *cpu_state);
 }

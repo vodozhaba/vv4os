@@ -364,14 +364,19 @@ void X86IrqHandler(X86CpuState state) {
     PortWrite8(0x20, 0x20);
 }
 
-void X86SyscallHandler(volatile X86CpuState state) {
+void X86SyscallHandler(X86CpuState state) {
+    Process* current = GetProcess(UserProcessCurrent());
     state.eax = Syscall(state.eax, state.ebx, state.ecx, state.edx);
+    __asm volatile("pushf");
+    __asm volatile("cli");
+    memcpy(current->last_state, &state, sizeof(state));
+    __asm volatile("popf");
 }
 
 void X86SchedulerTick(X86CpuState* state) {
     Process* process = GetProcess(UserProcessCurrent());
     if(process != NULL)
-        memcpy(process->saved_state, state, sizeof(*state));
+        memcpy(process->last_state, state, sizeof(*state));
     SchedulerTick();
 }
 
