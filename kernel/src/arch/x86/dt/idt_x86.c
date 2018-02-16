@@ -663,6 +663,9 @@ void X86IdtInit() {
 
     PortWrite8(0x40, div);
     PortWrite8(0x40, div >> 8);
+
+    X86StopScheduler();
+    __asm volatile("sti");
 }
 
 void X86RegisterIsrHandler(uint8_t n, InterruptHandler handler) {

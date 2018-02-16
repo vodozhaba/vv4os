@@ -19,7 +19,11 @@ typedef struct Process {
 void X86InitProcess(Process* process);
 void X86RestoreProcess(Process* process);
 void X86RemoveProcess(Process* process);
+void X86StartScheduler();
+void X86StopScheduler();
 
+void StartScheduler();
+void StopScheduler();
 void SchedulerTick();
 void RemoveProcess(uint32_t pid);
 Process* GetProcess(uint32_t pid);

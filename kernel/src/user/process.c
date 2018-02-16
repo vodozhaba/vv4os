@@ -11,14 +11,40 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "core/config.h"
 #include "mem/phys_mem_mgr.h"
 #include "mem/virt_mem_mgr.h"
 
 static uint32_t last_pid = 0;
 static Process* head = NULL;
 static Process* current = NULL;
+static Process* next = NULL;
+static bool scheduling;
+
+void StartScheduler() {
+    scheduling = true;
+    #if defined(__X86__)
+    X86StartScheduler();
+    #else
+    #error "Cannot determine target architecture"
+    #endif
+}
+
+void StopScheduler() {
+    scheduling = false;
+    #if defined(__X86__)
+    X86StopScheduler();
+    #else
+    #error "Cannot determine target architecture"
+    #endif
+}
 
 void SchedulerTick() {
+    if(next) {
+        current = next;
+        next = NULL;
+        X86RestoreProcess(current);
+    }
     if(!head) {
         printf("No more processes in the system. Halt.\n");
         exit(0);
@@ -33,23 +59,39 @@ void SchedulerTick() {
     }
 }
 
-
 void RemoveProcess(uint32_t pid) {
+    bool start_scheduler = scheduling;
+    StopScheduler();
+    Process* process = GetProcess(pid);
+    Process* process_next = process->next;
     if(head->pid == pid) {
         head = head->next;
-        return;
+    } else {
+        Process* prev;
+        for(prev = head; prev->next != NULL && prev->next->pid != pid; prev = prev->next);
+        if(prev->next->pid == pid) {
+            prev->next = prev->next->next;
+        }
     }
-    Process* process = GetProcess(pid);
-    Process* prev;
-    for(prev = head; prev->next != NULL && prev->next->pid != pid; prev = prev->next);
-    if(prev->next->pid == pid) {
-        prev->next = prev->next->next;
+    if(UserProcessCurrent() == pid) {
+        next = process_next;
     }
     #if defined(__X86__)
     X86RemoveProcess(process);
     #else
     #error "Cannot determine target architecture"
     #endif
+    free(process->last_state);
+    for(FileDescriptor* file = process->local_files; file; ) {
+        FileDescriptor* prev = file;
+        file = file->next;
+        free(prev);
+    }
+    free(process);
+    free(process->kernel_stack - KERNEL_SYSCALL_STACK);
+    if(start_scheduler) {
+        StartScheduler();
+    }
 }
 
 Process* GetProcess(uint32_t pid) {
@@ -90,8 +132,13 @@ uint32_t UserProcessLoad(FileDescriptor* file, FileDescriptor* stdin, FileDescri
     #else
     #error "Cannot determine target architecture"
     #endif
+    bool start_scheduler = scheduling;
+    X86StopScheduler();
     process->next = head;
     head = process;
+    if(start_scheduler) {
+        StartScheduler();
+    }
     return process->pid;
 }
 

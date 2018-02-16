@@ -11,10 +11,19 @@
 #include "arch/x86/dt/gdt_x86.h"
 #include "arch/x86/dt/idt_x86.h"
 #include "core/config.h"
+#include "io/ports.h"
 #include "mem/kernel_mem.h"
 #include "mem/virt_mem_mgr.h"
 
 extern void X86UserlandJump(void* address_space, X86CpuState cpu_state);
+
+void X86StopScheduler() {
+    PortWrite8(0x21, PortRead8(0x21) | 0x01);
+}
+
+void X86StartScheduler() {
+    PortWrite8(0x21, PortRead8(0x21) & 0xFE);
+}
 
 void X86InitProcess(Process* process) {
     X86CpuState* state = calloc(1, sizeof(X86CpuState));

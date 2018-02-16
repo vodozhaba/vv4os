@@ -175,11 +175,30 @@ static void UnmapFrame(void* virtual, PageDirectoryEntry* directory) {
 }
 
 void X86PageFaultHandler(X86CpuState* cpu_state) {
-    fprintf(stderr,
-"\nA page fault (error code %d) has occured. It's a fatal error. Please, write down\n"
-"this message and what you were doing when the error occured and submit an\n"
-"issue at https://github.com/vodozhaba/vv4os/issues/.\n", cpu_state->error_code);
-    exit(1);
+    uint32_t pid = UserProcessCurrent();
+    char* action;
+    switch(cpu_state->error_code) {
+        case 0:
+        case 4:
+            action = "read a non-present page";
+            break;
+        case 1:
+        case 5:
+            action = "read a protected page";
+            break;
+        case 2:
+        case 6:
+            action = "write to a non-present page";
+            break;
+        case 3:
+        case 7:
+            action = "write to a protected page";
+            break;
+        default:
+            action = "do something bad";
+    }
+    fprintf(stderr, "Process with PID %d attempted to %s and was terminated.\n", pid, action);
+    RemoveProcess(pid);
 }
 
 static void* AllocateMap(void* phys) {
@@ -256,9 +275,14 @@ void X86FreeContiguousVirtualFrames(void* base, uint32_t frames) {
     for(uint32_t frame = 0; frame < frames; frame++) {
         uint32_t offset = frame * 0x1000;
         void* addr = base + offset;
-        void* phys = (void*)(GetPte((VirtualAddr) addr, current_page_directory).page_frame_addr << 12);
-        X86PhysFreeFrame(phys);
-        UnmapFrame(addr, current_page_directory);
+        PageTableEntry pte = GetPte((VirtualAddr) addr, current_page_directory);
+        void* phys = (void*)(pte.page_frame_addr << 12);
+        if(pte.present) {
+            if(phys) {
+                PhysFreeFrame(phys);
+            }
+            UnmapFrame(addr, current_page_directory);
+        }
     }
 }
 
@@ -288,11 +312,14 @@ void* X86CreateStack(void* address_space, void* top, size_t size) {
 }
 
 void X86RemoveProcess(Process* process) {
-    for(void* frame = NULL; frame < (void*)((uint32_t) KERNEL_STATIC_MEM_START & 0xFFFFF000); frame += 0x1000) {
-        void* phys = (void*)(GetPte((VirtualAddr) frame, process->address_space).page_frame_addr << 12);
-        if(phys) {
-            PhysFreeFrame(phys);
+    for(void* frame = NULL; frame < (void*)((uint32_t) KERNEL_STATIC_MEM_START & 0xFFC00000); frame += 0x1000) {
+        PageTableEntry pte = GetPte((VirtualAddr) frame, process->address_space);
+        if(pte.present) {
+            UnmapFrame(frame, process->address_space);
+            void* phys = (void*)(pte.page_frame_addr << 12);
+            if(phys) {
+                PhysFreeFrame(phys);
+            }
         }
-        UnmapFrame(frame, process->address_space);
     }
 }
