@@ -13,7 +13,7 @@
 #define assert(b) \
 do { \
     if(!(b)) { \
-        printf("assert() failed at %s:%d.", __FILE__, __LINE__); \
+        fprintf(stderr, "assert() failed at %s:%d.", __FILE__, __LINE__); \
         while(true); \
     } \
 } while(false)
