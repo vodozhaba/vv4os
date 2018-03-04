@@ -159,6 +159,7 @@ static FileDescriptor* GenFileDescriptor(Volume* volume, FatDirectoryEntry* entr
     ret->seek = 0;
     ret->traverse_op = Fat32TraverseOp;
     ret->read_op = Fat32ReadOp;
+    ret->write_op = FileAccessOpStub;
     ret->volume = volume;
     if(entry->sfn.attr & FAT_ATTR_DIRECTORY) {
         ret->size = 0;
