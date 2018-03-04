@@ -16,9 +16,10 @@ typedef struct Process {
     uint32_t pid;
 } Process;
 
-void X86InitProcess(Process* process);
+void X86GenInitialProcessState(Process* process);
 void X86RestoreProcess(Process* process);
-void X86RemoveProcess(Process* process);
+void X86RestoreKernel(void (*entry)(void*), void* param);  
+void X86DeleteAddressSpace(void* address_space);
 void X86StartScheduler();
 void X86StopScheduler();
 

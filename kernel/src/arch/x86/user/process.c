@@ -15,7 +15,10 @@
 #include "mem/kernel_mem.h"
 #include "mem/virt_mem_mgr.h"
 
+uint8_t kernel_stack[KERNEL_SYSCALL_STACK];
+
 extern void X86UserlandJump(void* address_space, X86CpuState cpu_state);
+extern void _X86RestoreKernel(void* esp, void (*entry)(void*), void* param);
 
 void X86StopScheduler() {
     PortWrite8(0x21, PortRead8(0x21) | 0x01);
@@ -25,7 +28,7 @@ void X86StartScheduler() {
     PortWrite8(0x21, PortRead8(0x21) & 0xFE);
 }
 
-void X86InitProcess(Process* process) {
+void X86GenInitialProcessState(Process* process) {
     X86CpuState* state = calloc(1, sizeof(X86CpuState));
     state->cs = 0x1B;
     state->ds = 0x23;
@@ -35,11 +38,14 @@ void X86InitProcess(Process* process) {
     state->ss = 0x23;
     state->user_esp = state->esp;
     process->last_state = state;
-    process->kernel_stack = malloc(KERNEL_SYSCALL_STACK) + KERNEL_SYSCALL_STACK;
 }
 
 void X86RestoreProcess(Process* process) {
     X86CpuState* cpu_state = process->last_state;
     X86SetKernelStack(process->kernel_stack);
     X86UserlandJump(process->address_space, *cpu_state);
+}
+
+void X86RestoreKernel(void (*entry)(void*), void* param) {
+    _X86RestoreKernel(kernel_stack + KERNEL_SYSCALL_STACK, entry, param);
 }

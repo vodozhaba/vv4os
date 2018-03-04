@@ -59,39 +59,48 @@ void SchedulerTick() {
     }
 }
 
-void RemoveProcess(uint32_t pid) {
-    bool start_scheduler = scheduling;
-    StopScheduler();
-    Process* process = GetProcess(pid);
-    Process* process_next = process->next;
-    if(head->pid == pid) {
-        head = head->next;
-    } else {
-        Process* prev;
-        for(prev = head; prev->next != NULL && prev->next->pid != pid; prev = prev->next);
-        if(prev->next->pid == pid) {
-            prev->next = prev->next->next;
+typedef struct {
+    bool start_scheduler;
+    uint32_t pid;
+} RemoveProcessParam;
+
+static void _RemoveProcess(void* param) {
+    RemoveProcessParam* s_param = (RemoveProcessParam*) param;
+    Process* process = NULL;
+    // Keep a reference to the pointer to the next process so that we don't have to keep track of two processes
+    for(Process** next = &head; next; next = &(*next)->next) {
+        if((*next)->pid == s_param->pid) {
+            process = *next;
+            *next = (*next)->next;
+            break;
         }
     }
-    if(UserProcessCurrent() == pid) {
-        next = process_next;
+    if(process) {
+        #if defined(__X86__)
+        X86DeleteAddressSpace(process->address_space);
+        #else
+        #error "Cannot determine target architecture"
+        #endif
+        free(process->kernel_stack - KERNEL_SYSCALL_STACK);
+        free(process->last_state);
+        for(FileDescriptor* file = process->local_files; file; ) {
+            FileDescriptor* next = file->next;
+            free(file);
+            file = next;
+        }
     }
-    #if defined(__X86__)
-    X86RemoveProcess(process);
-    #else
-    #error "Cannot determine target architecture"
-    #endif
-    free(process->last_state);
-    for(FileDescriptor* file = process->local_files; file; ) {
-        FileDescriptor* prev = file;
-        file = file->next;
-        free(prev);
-    }
-    free(process);
-    free(process->kernel_stack - KERNEL_SYSCALL_STACK);
-    if(start_scheduler) {
+    if(s_param->start_scheduler) {
         StartScheduler();
+        while(1);
     }
+}
+
+void RemoveProcess(uint32_t pid) {
+    RemoveProcessParam* param = malloc(sizeof(*param));
+    param->start_scheduler = scheduling;
+    param->pid = pid;
+    StopScheduler();
+    X86RestoreKernel(_RemoveProcess, param);
 }
 
 Process* GetProcess(uint32_t pid) {
@@ -101,6 +110,8 @@ Process* GetProcess(uint32_t pid) {
 }
 
 uint32_t UserProcessLoad(FileDescriptor* file, FileDescriptor* stdin, FileDescriptor* stdout, FileDescriptor* stderr) {
+    bool start_scheduler = scheduling;
+    X86StopScheduler();
     if(last_pid == UINT32_MAX - 1) {
         return 0;
     }
@@ -112,8 +123,6 @@ uint32_t UserProcessLoad(FileDescriptor* file, FileDescriptor* stdin, FileDescri
     file->seek = 0;
     file->read_op(file, file->size, buf);
     Process* process = malloc(sizeof(*process));
-    process->address_space = CreateAddressSpace(buf, frames);
-    process->pid = ++last_pid;
     FileDescriptor* l_stdin = malloc(sizeof(*l_stdin));
     memcpy(l_stdin, stdin, sizeof(*l_stdin));
     l_stdin->local_id = 0;
@@ -127,13 +136,14 @@ uint32_t UserProcessLoad(FileDescriptor* file, FileDescriptor* stdin, FileDescri
     l_stdin->next = l_stdout;
     l_stdout->next = l_stderr;
     l_stderr->next = NULL;
+    process->kernel_stack = malloc(KERNEL_SYSCALL_STACK) + KERNEL_SYSCALL_STACK;
+    process->address_space = CreateAddressSpace(buf, frames);
     #if defined(__X86__)
-    X86InitProcess(process);
+    X86GenInitialProcessState(process);
     #else
     #error "Cannot determine target architecture"
     #endif
-    bool start_scheduler = scheduling;
-    X86StopScheduler();
+    process->pid = ++last_pid;
     process->next = head;
     head = process;
     if(start_scheduler) {

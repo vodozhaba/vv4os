@@ -206,6 +206,7 @@ static void* AllocateMap(void* phys) {
     MapFrame(virt, phys, true, true, false, kernel_page_directory);
     return virt;
 }
+
 void X86SwitchPageDirectory(PageDirectoryEntry* directory) {
     current_page_directory = directory;
     if(directory == kernel_page_directory) {
@@ -311,15 +312,23 @@ void* X86CreateStack(void* address_space, void* top, size_t size) {
     return (void*)((uint32_t) top & 0xFFFFF000);
 }
 
-void X86RemoveProcess(Process* process) {
+void X86DeleteAddressSpace(void* address_space) {
     for(void* frame = NULL; frame < (void*)((uint32_t) KERNEL_STATIC_MEM_START & 0xFFC00000); frame += 0x1000) {
-        PageTableEntry pte = GetPte((VirtualAddr) frame, process->address_space);
+        PageTableEntry pte = GetPte((VirtualAddr) frame, address_space);
         if(pte.present) {
-            UnmapFrame(frame, process->address_space);
+            UnmapFrame(frame, address_space);
             void* phys = (void*)(pte.page_frame_addr << 12);
             if(phys) {
                 PhysFreeFrame(phys);
             }
         }
+    }
+}
+
+void X86SwitchAddressSpace(void* address_space) {
+    if(address_space) {
+        X86SwitchPageDirectory(address_space);
+    } else {
+        X86SwitchAddressSpace(kernel_page_directory);
     }
 }

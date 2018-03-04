@@ -11,8 +11,8 @@ Use32
         mov ebp, esp
         mov eax, [ebp+8]
         push eax
-        extern X86SwitchPageDirectory
-        call X86SwitchPageDirectory
+        extern X86SwitchAddressSpace
+        call X86SwitchAddressSpace
         lea esp, [ebp+12]
         pop eax
         mov ds, ax
@@ -24,3 +24,14 @@ Use32
         popad
         add esp, 8
         iret
+    global _X86RestoreKernel
+    _X86RestoreKernel:
+        push ebp
+        mov ebp, esp
+        mov esp, [ebp+8]
+        mov ebx, [ebp+12]
+        mov eax, [ebp+16]
+        push ebp
+        mov ebp, esp
+        push eax
+        call ebx
