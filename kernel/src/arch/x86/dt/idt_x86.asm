@@ -369,7 +369,6 @@ Use32
 	    mov gs, ax
 	    popa
 	    add esp, 8
-	    sti
 	    iret
 
     global X86Syscall
