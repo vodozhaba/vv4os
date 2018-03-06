@@ -14,6 +14,7 @@
 #include "io/ports.h"
 #include "user/process.h"
 #include "user/syscall.h"
+#include "mem/virt_mem_mgr.h"
 
 typedef struct {
     uint16_t size;
@@ -365,19 +366,15 @@ void X86IrqHandler(X86CpuState state) {
 }
 
 void X86SyscallHandler(X86CpuState state) {
-    Process* current = GetProcess(UserProcessCurrent());
     state.eax = Syscall(state.eax, state.ebx, state.ecx, state.edx);
-    __asm volatile("pushf");
-    __asm volatile("cli");
-    memcpy(current->last_state, &state, sizeof(state));
-    __asm volatile("popf");
 }
 
 void X86SchedulerTick(X86CpuState* state) {
+    X86SwitchAddressSpace(NULL);
     Process* process = GetProcess(UserProcessCurrent());
     if(process != NULL)
         memcpy(process->last_state, state, sizeof(*state));
-    SchedulerTick();
+    X86RestoreKernel(SchedulerTick, NULL);
 }
 
 void X86IdtInit() {

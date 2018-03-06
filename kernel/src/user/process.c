@@ -40,22 +40,26 @@ void StopScheduler() {
 }
 
 void SchedulerTick() {
+    StopScheduler();
     if(next) {
         current = next;
         next = NULL;
         X86RestoreProcess(current);
     }
-    if(!head) {
-        printf("No more processes in the system. Halt.\n");
-        exit(0);
-    }
-    if(!current || !current->next) {
-        current = head;
-    } else {
-        current = current->next;
-    }
-    if(current) {
-        X86RestoreProcess(current);
+    while(true) {
+        if(!head) {
+            printf("No more processes in the system. Halt.\n");
+            exit(0);
+        }
+        if(!current || !current->next) {
+            current = head;
+        } else {
+            current = current->next;
+        }
+        if(current) {
+            StartScheduler();
+            X86RestoreProcess(current);
+        }
     }
 }
 
