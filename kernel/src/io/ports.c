@@ -15,7 +15,7 @@ static Bitmap bitmap;
 static void* bitmap_data;
 
 void IoPortMgrInit() {
-    bitmap_data = malloc(BITMAP_LEN - BITMAP_DZ);
+    bitmap_data = malloc(BITMAP_SIZE(BITMAP_LEN, BITMAP_DZ));
     bitmap.start = bitmap_data;
     bitmap.len = UINT16_MAX + 1;
     bitmap.dead_zone = BITMAP_DZ;

@@ -175,6 +175,7 @@ static void UnmapFrame(void* virtual, PageDirectoryEntry* directory) {
 }
 
 void X86PageFaultHandler(X86CpuState* cpu_state) {
+    X86StopScheduler();
     uint32_t pid = UserProcessCurrent();
     char* action;
     switch(cpu_state->error_code) {
@@ -197,8 +198,9 @@ void X86PageFaultHandler(X86CpuState* cpu_state) {
         default:
             action = "do something bad";
     }
-    fprintf(stderr, "Process with PID %d attempted to %s and was terminated.\n", pid, action);
     RemoveProcess(pid);
+    fprintf(stderr, "Process with PID %d attempted to %s and was terminated.\n", pid, action);
+    X86StartScheduler();
 }
 
 static void* AllocateMap(void* phys) {

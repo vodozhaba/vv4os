@@ -9,7 +9,7 @@
 
 // as long as the length is a size_t, a word index cannot exceed SIZE_T_MAX - 1
 #define BITMAP_INVALID_WORD_IX SIZE_MAX
-#define BITMAP_SIZE(l, d) ((l) - (d))
+#define BITMAP_SIZE(l, d) (((l) - (d)) / CHAR_BIT)
 
 typedef struct {
     size_t first_free;
