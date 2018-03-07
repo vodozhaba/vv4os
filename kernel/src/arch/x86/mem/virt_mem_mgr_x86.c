@@ -321,6 +321,20 @@ void X86DeleteAddressSpace(void* address_space) {
             if(phys) {
                 PhysFreeFrame(phys);
             }
+        } else {
+            break;
+        }
+    }
+    for(void* frame = (void*)((uint32_t) KERNEL_STATIC_MEM_START & 0xFFC00000); frame; frame -= 0x1000) {
+        PageTableEntry pte = GetPte((VirtualAddr) frame, address_space);
+        if(pte.present) {
+            UnmapFrame(frame, address_space);
+            void* phys = (void*)(pte.page_frame_addr << 12);
+            if(phys) {
+                PhysFreeFrame(phys);
+            }
+        } else {
+            break;
         }
     }
 }

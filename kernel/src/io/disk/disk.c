@@ -75,6 +75,7 @@ void DiskSubsystemInit() {
     bitmap.start = bitmap_data;
     bitmap.len = MAX_DISKS + FIRST_IX;
     bitmap.dead_zone = FIRST_IX;
+    InitBitmap(&bitmap, false);
     for(PciDevice* controller = pci_devices_list; controller != NULL; controller = controller->next) {
 	    uint8_t class_code = PciConfigReadFromDevice8(controller, PCI_CONFIG_COMMON_OFFSET_CLASS_CODE);
 	    if(class_code == PCI_CLASS_CODE_MASS_STORAGE_CONTROLLER) {

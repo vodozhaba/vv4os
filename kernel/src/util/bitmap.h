@@ -12,10 +12,15 @@
 #define BITMAP_SIZE(l, d) ((l) - (d))
 
 typedef struct {
+    size_t first_free;
+} BitmapInternal;
+
+typedef struct {
     void* start;
     size_t len;
     // Use if the bitmap should not describe lower elements
     size_t dead_zone;
+    BitmapInternal internal;
 } Bitmap;
 
 void InitBitmap(Bitmap* bitmap, bool allocated);

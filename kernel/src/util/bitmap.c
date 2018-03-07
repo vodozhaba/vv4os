@@ -16,8 +16,9 @@
 
 static size_t FindInBitmap(Bitmap* bitmap, size_t len) {
     assert(bitmap);
+    assert(bitmap->internal.first_free >= bitmap->dead_zone);
     size_t* words = (size_t*) bitmap->start;
-    for(size_t i = bitmap->dead_zone, found = 0; i < bitmap->len; i++) {
+    for(size_t i = bitmap->internal.first_free, found = 0; i < bitmap->len; i++) {
         if(words[(i - bitmap->dead_zone) / BITS_PER_WORD] & (1 << ((i - bitmap->dead_zone) % BITS_PER_WORD))) {
             found = 0;
             continue;
@@ -32,6 +33,7 @@ static size_t FindInBitmap(Bitmap* bitmap, size_t len) {
 
 void InitBitmap(Bitmap* bitmap, bool allocated) {
     assert(bitmap);
+    bitmap->internal.first_free = allocated ? BITMAP_INVALID_WORD_IX : bitmap->dead_zone;
     MarkInBitmap(bitmap, bitmap->dead_zone, bitmap->len - bitmap->dead_zone, allocated);
 }
 
@@ -41,6 +43,13 @@ void MarkInBitmap(Bitmap* bitmap, size_t first, size_t len, bool allocated) {
     size_t* words = (size_t*) bitmap->start;
     for(size_t i = first; i < first + len; i++) {
         SetBit(&words[(i - bitmap->dead_zone) / BITS_PER_WORD], (i - bitmap->dead_zone) % BITS_PER_WORD, allocated);
+    }
+    if(allocated) {
+        if(first <= bitmap->internal.first_free && first + len > bitmap->internal.first_free) {
+            bitmap->internal.first_free = first + len;
+        }
+    } else if(first < bitmap->internal.first_free) {
+        bitmap->internal.first_free = first;
     }
 }
 

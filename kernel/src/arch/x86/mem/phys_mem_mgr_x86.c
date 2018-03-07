@@ -27,6 +27,7 @@ void X86PhysMemMgrInit(size_t ram_size) {
         kernel_frames++;
     }
     bitmap.dead_zone = kernel_frames + 1;
+    InitBitmap(&bitmap, false);
 }
 
 void* X86PhysAllocateFrame() {
