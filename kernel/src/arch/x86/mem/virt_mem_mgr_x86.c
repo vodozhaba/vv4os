@@ -177,6 +177,10 @@ static void UnmapFrame(void* virtual, PageDirectoryEntry* directory) {
 void X86PageFaultHandler(X86CpuState* cpu_state) {
     X86StopScheduler();
     uint32_t pid = UserProcessCurrent();
+    if(!pid) {
+        fprintf(stderr, "A page fault occured in the kernel. Well, this is bad.\n");
+        exit(1);
+    }
     char* action;
     switch(cpu_state->error_code) {
         case 0:

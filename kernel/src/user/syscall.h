@@ -6,4 +6,4 @@
 #include <stdarg.h>
 #include <stddef.h>
 
-size_t Syscall(size_t fn_code, ...);
+size_t Syscall(void* user_state, size_t fn_code, ...);

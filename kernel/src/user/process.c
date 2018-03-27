@@ -142,6 +142,7 @@ uint32_t UserProcessLoad(FileDescriptor* file, FileDescriptor* stdin, FileDescri
     l_stderr->next = NULL;
     process->kernel_stack = malloc(KERNEL_SYSCALL_STACK) + KERNEL_SYSCALL_STACK;
     process->address_space = CreateAddressSpace(buf, frames);
+    process->ppid = 0;
     #if defined(__X86__)
     X86GenInitialProcessState(process);
     #else
@@ -171,4 +172,30 @@ FileDescriptor* UserProcessLocalFile(uint32_t pid, uint32_t local_id) {
         }
     }
     return NULL;
+}
+
+void* GenReturnProcessState(void* old, size_t ret) {
+    #if defined(__X86__)
+    return X86GenReturnProcessState(old, ret);
+    #else
+    #error "Cannot determine target architecture"
+    #endif
+}
+
+uint32_t CopyProcess(Process* old, void* new_state) {
+    Process* new = malloc(sizeof(*new));
+    new->address_space = old->address_space;
+    new->last_state = new_state;
+    new->kernel_stack = malloc(KERNEL_SYSCALL_STACK) + KERNEL_SYSCALL_STACK;
+    new->local_files = old->local_files;
+    new->ppid = old->pid;
+    bool start_scheduler = scheduling;
+    StopScheduler();
+    new->pid = ++last_pid;
+    new->next = head;
+    head = new;
+    if(start_scheduler) {
+        StartScheduler();
+    }
+    return new->pid;
 }

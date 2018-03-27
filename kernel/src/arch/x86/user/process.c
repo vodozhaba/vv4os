@@ -49,3 +49,10 @@ void X86RestoreProcess(Process* process) {
 void X86RestoreKernel(void (*entry)(void*), void* param) {
     _X86RestoreKernel(kernel_stack + KERNEL_SYSCALL_STACK, entry, param);
 }
+
+void* X86GenReturnProcessState(void* old, size_t ret) {
+    X86CpuState* new = malloc(sizeof(*new));
+    memcpy(new, old, sizeof(*new));
+    new->eax = ret;
+    return new;
+}

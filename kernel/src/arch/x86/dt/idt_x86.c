@@ -366,7 +366,7 @@ void X86IrqHandler(X86CpuState state) {
 }
 
 void X86SyscallHandler(X86CpuState state) {
-    state.eax = Syscall(state.eax, state.ebx, state.ecx, state.edx);
+    state.eax = Syscall(&state, state.eax, state.ebx, state.ecx, state.edx);
 }
 
 void X86SchedulerTick(X86CpuState* state) {

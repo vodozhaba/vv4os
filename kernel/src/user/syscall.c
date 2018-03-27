@@ -17,6 +17,7 @@
 #define FN_CODE_GETPID 3
 #define FN_CODE_ISATTY 4
 #define FN_CODE_LSEEK 5
+#define FN_CODE_FORK 6
 
 size_t SyscallRead(va_list args) {
     uint32_t local_id = va_arg(args, uint32_t);
@@ -87,7 +88,14 @@ size_t SyscallLseek(va_list args) {
     return file->seek;
 }
 
-size_t Syscall(size_t fn_code, ...) {
+size_t SyscallFork(void* user_state) {
+    Process* parent = GetProcess(UserProcessCurrent());
+    void* state = GenReturnProcessState(user_state, 0);
+    uint32_t child = CopyProcess(parent, state);
+    return child;
+}
+
+size_t Syscall(void* user_state, size_t fn_code, ...) {
     va_list args;
     va_start(args, fn_code);
     size_t ret;
@@ -109,6 +117,9 @@ size_t Syscall(size_t fn_code, ...) {
             break;
         case FN_CODE_LSEEK:
             ret = SyscallLseek(args);
+            break;
+        case FN_CODE_FORK:
+            ret = SyscallFork(user_state);
             break;
         default:
             ret = -1;
