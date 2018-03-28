@@ -202,9 +202,10 @@ void X86PageFaultHandler(X86CpuState* cpu_state) {
         default:
             action = "do something bad";
     }
-    RemoveProcess(pid);
     fprintf(stderr, "Process with PID %d attempted to %s and was terminated.\n", pid, action);
+    RemoveProcess(pid);
     X86StartScheduler();
+    while(1);
 }
 
 static void* AllocateMap(void* phys) {
@@ -268,12 +269,18 @@ void X86VirtMemMgrInit() {
 }
 
 void* X86AllocateContiguousVirtualFrames(uint32_t frames, bool kernel) {
-    void* base = FindContiguousFreeFrames(frames, current_page_directory, kernel);
+    PageDirectoryEntry* directory;
+    if(kernel) {
+        directory = kernel_page_directory;
+    } else {
+        directory = current_page_directory;
+    }
+    void* base = FindContiguousFreeFrames(frames, directory, kernel);
     for(uint32_t frame = 0; frame < frames; frame++) {
         uint32_t offset = frame * 0x1000;
         void* addr = base + offset;
         MapFrame(addr, PhysAllocateFrame(), true, true, false,
-                current_page_directory);
+                directory);
     }
     return base;
 }
