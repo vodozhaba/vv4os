@@ -7,23 +7,18 @@
 // Purpose:    Interface the liballoc library for memory management.
 
 #include "mem/virt_mem_mgr.h"
+#include "util/sync.h"
+
+static Mutex liballoc_mutex = { .locked = false };
 
 int liballoc_lock() {
-    #if defined(__X86__)
-    __asm volatile("cli");
+    MutexLock(&liballoc_mutex);
     return 0;
-    #else
-    return -1;
-    #endif
 }
 
 int liballoc_unlock() {
-    #if defined(__X86__)
-    __asm volatile("sti");
+    MutexRelease(&liballoc_mutex);
     return 0;
-    #else
-    return -1;
-    #endif
 }
 
 void* liballoc_alloc(size_t pages) {

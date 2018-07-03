@@ -6,10 +6,10 @@
 // Created on: Feb 11, 2018
 // Purpose:    The kernel's interface for user processes.
 
+#include <stdio.h>
 #include "mem/kernel_mem.h"
 #include "user/process.h"
 #include "user/syscall.h"
-#include <stdio.h>
 
 #define FN_CODE_READ 0
 #define FN_CODE_WRITE 1

@@ -11,6 +11,7 @@
 #include <assert.h>
 #include "mem/kernel_mem.h"
 #include "ports.h"
+#include "util/sync.h"
 
 static const unsigned int VGA_BUFFER_HEIGHT = 25, VGA_BUFFER_WIDTH = 80;
 
@@ -87,14 +88,18 @@ void VgaTerminalInit() {
 }
 
 void VgaTerminalPut(char c) {
+    static Mutex vga_mutex = { .locked = false };
+    MutexLock(&vga_mutex);
     switch(c) {
         case '\n':
-            return AdvanceCursor(VGA_BUFFER_WIDTH - current_x);
+            AdvanceCursor(VGA_BUFFER_WIDTH - current_x);
+            break;
         default:
             SetEntryAt(current_x, current_y,
                     ConstructVgaEntry(c, current_color_scheme));
             AdvanceCursor(1);
     }
+    MutexRelease(&vga_mutex);
 }
 
 VgaColorScheme VgaTerminalGetColorScheme() {

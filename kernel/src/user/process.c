@@ -14,7 +14,9 @@
 #include "core/config.h"
 #include "mem/phys_mem_mgr.h"
 #include "mem/virt_mem_mgr.h"
+#include "util/sync.h"
 
+static Mutex process_table_mutex = { .locked = false };
 static uint32_t last_pid = 0;
 static Process* head = NULL;
 static Process* current = NULL;
@@ -72,6 +74,7 @@ static void _RemoveProcess(void* param) {
     RemoveProcessParam* s_param = (RemoveProcessParam*) param;
     Process* process = NULL;
     // Keep a reference to the pointer to the next process so that we don't have to keep track of two processes
+    MutexLock(&process_table_mutex);
     for(Process** next = &head; next; next = &(*next)->next) {
         if((*next)->pid == s_param->pid) {
             process = *next;
@@ -93,6 +96,7 @@ static void _RemoveProcess(void* param) {
             file = next;
         }
     }
+    MutexRelease(&process_table_mutex);
     if(s_param->start_scheduler) {
         StartScheduler();
         while(1);
@@ -109,13 +113,13 @@ void RemoveProcess(uint32_t pid) {
 
 Process* GetProcess(uint32_t pid) {
     Process* process;
+    MutexLock(&process_table_mutex);
     for(process = head; process != NULL && process->pid != pid; process = process->next);
+    MutexRelease(&process_table_mutex);
     return process;
 }
 
 uint32_t UserProcessLoad(FileDescriptor* file, FileDescriptor* stdin, FileDescriptor* stdout, FileDescriptor* stderr) {
-    bool start_scheduler = scheduling;
-    X86StopScheduler();
     if(last_pid == UINT32_MAX - 1) {
         return 0;
     }
@@ -148,9 +152,13 @@ uint32_t UserProcessLoad(FileDescriptor* file, FileDescriptor* stdin, FileDescri
     #else
     #error "Cannot determine target architecture"
     #endif
+    MutexLock(&process_table_mutex);
+    bool start_scheduler = scheduling;
+    StopScheduler();
     process->pid = ++last_pid;
     process->next = head;
     head = process;
+    MutexRelease(&process_table_mutex);
     if(start_scheduler) {
         StartScheduler();
     }
@@ -189,11 +197,13 @@ uint32_t CopyProcess(Process* old, void* new_state) {
     new->kernel_stack = malloc(KERNEL_SYSCALL_STACK) + KERNEL_SYSCALL_STACK;
     new->local_files = old->local_files;
     new->ppid = old->pid;
+    MutexLock(&process_table_mutex);
     bool start_scheduler = scheduling;
     StopScheduler();
     new->pid = ++last_pid;
     new->next = head;
     head = new;
+    MutexRelease(&process_table_mutex);
     if(start_scheduler) {
         StartScheduler();
     }
