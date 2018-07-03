@@ -74,7 +74,6 @@ static void _RemoveProcess(void* param) {
     RemoveProcessParam* s_param = (RemoveProcessParam*) param;
     Process* process = NULL;
     // Keep a reference to the pointer to the next process so that we don't have to keep track of two processes
-    MutexLock(&process_table_mutex);
     for(Process** next = &head; next; next = &(*next)->next) {
         if((*next)->pid == s_param->pid) {
             process = *next;
@@ -105,8 +104,9 @@ static void _RemoveProcess(void* param) {
 
 void RemoveProcess(uint32_t pid) {
     RemoveProcessParam* param = malloc(sizeof(*param));
-    param->start_scheduler = scheduling;
     param->pid = pid;
+    MutexLock(&process_table_mutex);
+    param->start_scheduler = scheduling;
     StopScheduler();
     X86RestoreKernel(_RemoveProcess, param);
 }
