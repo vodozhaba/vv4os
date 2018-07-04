@@ -16,6 +16,7 @@ void X86FreeContiguousVirtualFrames(void* base, uint32_t frames);
 void* X86CreateAddressSpace(void* k_base, size_t frames);
 void X86SwitchAddressSpace(void* address_space);
 void X86DeleteAddressSpace(void* address_space);
+void* X86CopyAddressSpace(void* s_address_space);
 void* X86CreateStack(void* address_space, void* top, size_t size);
 
 #if !defined(__X86__)
@@ -36,12 +37,24 @@ static inline void* AllocateContiguousVirtualFrames(size_t frames, bool kernel) 
 
 static inline void FreeContiguousVirtualFrames(void* base, size_t frames) {
 #if defined(__X86__)
-    return X86FreeContiguousVirtualFrames(base, frames);
+    X86FreeContiguousVirtualFrames(base, frames);
 #endif
 }
 
 static inline void* CreateAddressSpace(void* k_base, size_t frames) {
 #if defined(__X86__)
     return X86CreateAddressSpace(k_base, frames);
+#endif
+}
+
+static inline void DeleteAddressSpace(void* address_space) {
+#if defined(__X86__)
+    X86DeleteAddressSpace(address_space);
+#endif
+}
+
+static inline void* CopyAddressSpace(void* s_address_space) {
+#if defined(__X86__)
+    return X86CopyAddressSpace(s_address_space);
 #endif
 }

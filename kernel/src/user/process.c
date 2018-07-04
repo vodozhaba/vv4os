@@ -82,11 +82,7 @@ static void _RemoveProcess(void* param) {
         }
     }
     if(process) {
-        #if defined(__X86__)
-        X86DeleteAddressSpace(process->address_space);
-        #else
-        #error "Cannot determine target architecture"
-        #endif
+        DeleteAddressSpace(process->address_space);
         free(process->kernel_stack - KERNEL_SYSCALL_STACK);
         free(process->last_state);
         for(FileDescriptor* file = process->local_files; file; ) {
@@ -192,7 +188,6 @@ void* GenReturnProcessState(void* old, size_t ret) {
 
 uint32_t CopyProcess(Process* old, void* new_state) {
     Process* new = malloc(sizeof(*new));
-    new->address_space = old->address_space;
     new->last_state = new_state;
     new->kernel_stack = malloc(KERNEL_SYSCALL_STACK) + KERNEL_SYSCALL_STACK;
     new->local_files = old->local_files;
@@ -200,6 +195,7 @@ uint32_t CopyProcess(Process* old, void* new_state) {
     MutexLock(&process_table_mutex);
     bool start_scheduler = scheduling;
     StopScheduler();
+    new->address_space = CopyAddressSpace(old->address_space);
     new->pid = ++last_pid;
     new->next = head;
     head = new;

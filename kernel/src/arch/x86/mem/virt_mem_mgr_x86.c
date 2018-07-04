@@ -65,6 +65,16 @@ static PageDirectoryEntry* current_page_directory;
 static void* AllocateMap(void* phys);
 static void UnmapFrame(void* virtual, PageDirectoryEntry* directory);
 
+static inline void Invlpg(VirtualAddr vaddr) {
+    #if defined(__i486__) || defined(__i586__) || defined(__i686__)
+        __asm volatile("invlpg (%d0)" : : "b" ((uint32_t) vaddr.linear) : "memory");
+    #else
+        uint32_t cr3;
+        __asm volatile("movl %%cr3, %d0" : "=a" (cr3));
+        __asm volatile("movl %d0, %%cr3" : : "a" (cr3));
+    #endif
+}
+
 static PageTableEntry GetPte(VirtualAddr vaddr, PageDirectoryEntry* directory) {
     if(directory == kernel_page_directory) {
         return kernel_page_table[vaddr.page.directory_entry * 1024 + vaddr.page.table_entry];
@@ -98,6 +108,7 @@ static void CreatePageTable(VirtualAddr vaddr,
 static void SetPte(VirtualAddr vaddr, PageDirectoryEntry* directory, PageTableEntry pte) {
     if(directory == kernel_page_directory) {
         kernel_page_table[vaddr.page.directory_entry * 1024 + vaddr.page.table_entry] = pte;
+        Invlpg(vaddr);
         return;
     }
     PageDirectoryEntry* pde = &directory[vaddr.page.directory_entry];
@@ -108,10 +119,9 @@ static void SetPte(VirtualAddr vaddr, PageDirectoryEntry* directory, PageTableEn
     PageTableEntry* table = AllocateMap(phys);
     table[vaddr.page.table_entry] = pte;
     UnmapFrame(table, kernel_page_directory);
-    // TODO: add conditional INVLPG for post-i486
-    uint32_t cr3;
-    __asm volatile("movl %%cr3, %d0" : "=a" (cr3));
-    __asm volatile("movl %d0, %%cr3" : : "a" (cr3));
+    if(directory == current_page_directory) {
+        Invlpg(vaddr);
+    }
 }
 
 static void MapFrame(void* virtual, void* physical, bool writable, bool cached,
@@ -210,7 +220,7 @@ void X86PageFaultHandler(X86CpuState* cpu_state) {
 
 static void* AllocateMap(void* phys) {
     void* virt = FindContiguousFreeFrames(1, kernel_page_directory, true);
-    MapFrame(virt, phys, true, true, false, kernel_page_directory);
+    MapFrame(virt, phys, true, false, false, kernel_page_directory);
     return virt;
 }
 
@@ -264,7 +274,7 @@ void X86VirtMemMgrInit() {
     if(kernel_len % FRAME_SIZE) {
         kernel_frames++;
     }
-    MapRange((void*) first_kernel_frame + 0x1000, (void*) 0x1000, kernel_frames, true, true, false, kernel_page_directory);
+    MapRange((void*) first_kernel_frame + 0x1000, (void*) 0x1000, kernel_frames, true, false, false, kernel_page_directory);
     X86SwitchPageDirectory(kernel_page_directory);
 }
 
@@ -279,7 +289,7 @@ void* X86AllocateContiguousVirtualFrames(uint32_t frames, bool kernel) {
     for(uint32_t frame = 0; frame < frames; frame++) {
         uint32_t offset = frame * 0x1000;
         void* addr = base + offset;
-        MapFrame(addr, PhysAllocateFrame(), true, true, false,
+        MapFrame(addr, PhysAllocateFrame(), true, false, false,
                 directory);
     }
     return base;
@@ -356,6 +366,56 @@ void X86SwitchAddressSpace(void* address_space) {
     if(address_space) {
         X86SwitchPageDirectory(address_space);
     } else {
-        X86SwitchAddressSpace(kernel_page_directory);
+        X86SwitchPageDirectory(kernel_page_directory);
     }
+}
+
+static PageTableEntry CopyPte(PageTableEntry s_pte, void* s_v_buf, void* d_v_buf) {
+    if(!s_pte.present) {
+        return (PageTableEntry) { 0 };
+    }
+    void* d_frame_phys = X86PhysAllocateFrame();
+    MapFrame(d_v_buf, d_frame_phys, true, false, false, kernel_page_directory);
+    void* s_frame_phys = (void*)(s_pte.page_frame_addr << 12);
+    MapFrame(s_v_buf, s_frame_phys, true, false, false, kernel_page_directory);
+    memcpy(d_v_buf, s_v_buf, FRAME_SIZE);
+    s_pte.page_frame_addr = (uint32_t) d_frame_phys >> 12;
+    return s_pte;
+}
+
+static PageDirectoryEntry CopyPde(PageDirectoryEntry s_pde, void* s_pde_cache, void* d_pde_cache, void* s_pte_cache, void* d_pte_cache) {
+    if(!s_pde.present) {
+        return (PageDirectoryEntry) { 0 };
+    }
+    void* d_table_phys = X86PhysAllocateFrame();
+    MapFrame(d_pde_cache, d_table_phys, true, false, false, kernel_page_directory);
+    void* s_table_phys = (void*)(s_pde.page_table_addr << 12);
+    MapFrame(s_pde_cache, s_table_phys, true, false, false, kernel_page_directory);
+    PageTableEntry* d_table_virt = d_pde_cache;
+    PageTableEntry* s_table_virt = s_pde_cache;
+    for(size_t i = 0; i < 1024; i++) {
+        d_table_virt[i] = CopyPte(s_table_virt[i], s_pte_cache, d_pte_cache);
+    }
+    s_pde.page_table_addr = (uint32_t) d_table_phys >> 12;
+    return s_pde;
+}
+
+void* X86CopyAddressSpace(void* s_address_space) {
+    PageDirectoryEntry* s_dir = s_address_space;
+    PageDirectoryEntry* d_dir = X86AllocateContiguousVirtualFrames(1, true);
+    void* s_pde_cache = AllocateMap(NULL);
+    void* d_pde_cache = AllocateMap(NULL);
+    void* s_pte_cache = AllocateMap(NULL);
+    void* d_pte_cache = AllocateMap(NULL);
+    for(size_t i = 0; i < 768; i++) {
+        d_dir[i] = CopyPde(s_dir[i], s_pde_cache, d_pde_cache, s_pte_cache, d_pte_cache);
+    }
+    for(size_t i = 768; i < 1024; i++) {
+        d_dir[i] = s_dir[i];
+    }
+    UnmapFrame(s_pde_cache, kernel_page_directory);
+    UnmapFrame(d_pde_cache, kernel_page_directory);
+    UnmapFrame(s_pte_cache, kernel_page_directory);
+    UnmapFrame(d_pte_cache, kernel_page_directory);
+    return d_dir;
 }
