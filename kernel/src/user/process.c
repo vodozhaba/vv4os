@@ -94,7 +94,7 @@ static void _RemoveProcess(void* param) {
     MutexRelease(&process_table_mutex);
     if(s_param->start_scheduler) {
         StartScheduler();
-        while(1);
+        __asm volatile("hlt");
     }
 }
 
@@ -161,15 +161,11 @@ uint32_t UserProcessLoad(FileDescriptor* file, FileDescriptor* stdin, FileDescri
     return process->pid;
 }
 
-uint32_t UserProcessCurrent() {
-    return current ? current->pid : 0;
+Process* UserProcessCurrent() {
+    return current;
 }
 
-FileDescriptor* UserProcessLocalFile(uint32_t pid, uint32_t local_id) {
-    Process* process = GetProcess(pid);
-    if(!process) {
-        return NULL;
-    }
+FileDescriptor* UserProcessLocalFile(Process* process, uint32_t local_id) {
     for(FileDescriptor* file = process->local_files; file != NULL; file = file->next) {
         if(file->local_id == local_id) {
             return file;

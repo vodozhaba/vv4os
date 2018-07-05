@@ -34,5 +34,5 @@ void RemoveProcess(uint32_t pid);
 uint32_t CopyProcess(Process* old, void* new_state);
 Process* GetProcess(uint32_t pid);
 uint32_t UserProcessLoad(FileDescriptor* file, FileDescriptor* stdin, FileDescriptor* stdout, FileDescriptor* stderr);
-uint32_t UserProcessCurrent();
-FileDescriptor* UserProcessLocalFile(uint32_t pid, uint32_t local_id);
+Process* UserProcessCurrent();
+FileDescriptor* UserProcessLocalFile(Process* process, uint32_t local_id);

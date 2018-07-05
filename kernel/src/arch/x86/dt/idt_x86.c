@@ -371,7 +371,7 @@ void X86SyscallHandler(X86CpuState state) {
 
 void X86SchedulerTick(X86CpuState* state) {
     X86SwitchAddressSpace(NULL);
-    Process* process = GetProcess(UserProcessCurrent());
+    Process* process = UserProcessCurrent();
     if(process != NULL)
         memcpy(process->last_state, state, sizeof(*state));
     X86RestoreKernel(SchedulerTick, NULL);

@@ -50,13 +50,13 @@ size_t SyscallWrite(va_list args) {
 }
 
 size_t SyscallExit() {
-    RemoveProcess(UserProcessCurrent());
-    while(1);
+    RemoveProcess(UserProcessCurrent()->pid);
+    __asm volatile("hlt");
     return 0; // not executed
 }
 
 size_t SyscallGetpid() {
-    return UserProcessCurrent();
+    return UserProcessCurrent()->pid;
 }
 
 size_t SyscallIsatty(va_list args) {
@@ -89,7 +89,7 @@ size_t SyscallLseek(va_list args) {
 }
 
 size_t SyscallFork(void* user_state) {
-    Process* parent = GetProcess(UserProcessCurrent());
+    Process* parent = UserProcessCurrent();
     void* state = GenReturnProcessState(user_state, 0);
     uint32_t child = CopyProcess(parent, state);
     return child;

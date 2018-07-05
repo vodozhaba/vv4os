@@ -186,7 +186,7 @@ static void UnmapFrame(void* virtual, PageDirectoryEntry* directory) {
 
 void X86PageFaultHandler(X86CpuState* cpu_state) {
     X86StopScheduler();
-    uint32_t pid = UserProcessCurrent();
+    uint32_t pid = UserProcessCurrent()->pid;
     if(!pid) {
         fprintf(stderr, "A page fault occured in the kernel. Well, this is bad.\n");
         exit(1);
@@ -215,7 +215,7 @@ void X86PageFaultHandler(X86CpuState* cpu_state) {
     fprintf(stderr, "Process with PID %d attempted to %s and was terminated.\n", pid, action);
     RemoveProcess(pid);
     X86StartScheduler();
-    while(1);
+    __asm volatile("hlt");
 }
 
 static void* AllocateMap(void* phys) {
