@@ -20,7 +20,6 @@ static Mutex process_table_mutex = { .locked = false };
 static uint32_t last_pid = 0;
 static Process* head = NULL;
 static Process* current = NULL;
-static Process* next = NULL;
 static bool scheduling;
 
 void StartScheduler() {
@@ -42,26 +41,22 @@ void StopScheduler() {
 }
 
 void SchedulerTick() {
-    StopScheduler();
-    if(next) {
-        current = next;
-        next = NULL;
-        X86RestoreProcess(current);
+    if(!MutexTryLock(&process_table_mutex)) {
+        return;
     }
-    while(true) {
-        if(!head) {
-            printf("No more processes in the system. Halt.\n");
-            exit(0);
-        }
-        if(!current || !current->next) {
-            current = head;
-        } else {
-            current = current->next;
-        }
-        if(current) {
-            StartScheduler();
-            X86RestoreProcess(current);
-        }
+    if(!head) {
+        printf("No more processes in the system. Halt.\n");
+        exit(0);
+    }
+    if(!current || !current->next) {
+        current = head;
+    } else {
+        current = current->next;
+    }
+    if(current) {
+        StartScheduler();
+        MutexRelease(&process_table_mutex);
+        X86RestoreProcess(current);
     }
 }
 
