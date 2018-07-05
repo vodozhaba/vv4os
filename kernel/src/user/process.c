@@ -20,10 +20,8 @@ static Mutex process_table_mutex = { .locked = false };
 static uint32_t last_pid = 0;
 static Process* head = NULL;
 static Process* current = NULL;
-static bool scheduling;
 
 void StartScheduler() {
-    scheduling = true;
     #if defined(__X86__)
     X86StartScheduler();
     #else
@@ -32,7 +30,6 @@ void StartScheduler() {
 }
 
 void StopScheduler() {
-    scheduling = false;
     #if defined(__X86__)
     X86StopScheduler();
     #else
@@ -40,10 +37,17 @@ void StopScheduler() {
     #endif
 }
 
+static void ProcessTableLock() {
+    MutexLock(&process_table_mutex);
+    StopScheduler();
+}
+
+static void ProcessTableRelease() {
+    MutexRelease(&process_table_mutex);
+    StartScheduler();
+}
+
 void SchedulerTick() {
-    if(!MutexTryLock(&process_table_mutex)) {
-        return;
-    }
     if(!head) {
         printf("No more processes in the system. Halt.\n");
         exit(0);
@@ -54,8 +58,6 @@ void SchedulerTick() {
         current = current->next;
     }
     if(current) {
-        StartScheduler();
-        MutexRelease(&process_table_mutex);
         X86RestoreProcess(current);
     }
 }
@@ -86,27 +88,22 @@ static void _RemoveProcess(void* param) {
             file = next;
         }
     }
-    MutexRelease(&process_table_mutex);
-    if(s_param->start_scheduler) {
-        StartScheduler();
-        __asm volatile("hlt");
-    }
+    ProcessTableRelease();
+    __asm volatile("hlt");
 }
 
 void RemoveProcess(uint32_t pid) {
     RemoveProcessParam* param = malloc(sizeof(*param));
     param->pid = pid;
-    MutexLock(&process_table_mutex);
-    param->start_scheduler = scheduling;
-    StopScheduler();
+    ProcessTableLock();
     X86RestoreKernel(_RemoveProcess, param);
 }
 
 Process* GetProcess(uint32_t pid) {
     Process* process;
-    MutexLock(&process_table_mutex);
+    ProcessTableLock();
     for(process = head; process != NULL && process->pid != pid; process = process->next);
-    MutexRelease(&process_table_mutex);
+    ProcessTableRelease();
     return process;
 }
 
@@ -143,16 +140,11 @@ uint32_t UserProcessLoad(FileDescriptor* file, FileDescriptor* stdin, FileDescri
     #else
     #error "Cannot determine target architecture"
     #endif
-    MutexLock(&process_table_mutex);
-    bool start_scheduler = scheduling;
-    StopScheduler();
+    ProcessTableLock();
     process->pid = ++last_pid;
     process->next = head;
     head = process;
-    MutexRelease(&process_table_mutex);
-    if(start_scheduler) {
-        StartScheduler();
-    }
+    ProcessTableRelease();
     return process->pid;
 }
 
@@ -183,16 +175,11 @@ uint32_t CopyProcess(Process* old, void* new_state) {
     new->kernel_stack = malloc(KERNEL_SYSCALL_STACK) + KERNEL_SYSCALL_STACK;
     new->local_files = old->local_files;
     new->ppid = old->pid;
-    MutexLock(&process_table_mutex);
-    bool start_scheduler = scheduling;
-    StopScheduler();
+    ProcessTableLock();
     new->address_space = CopyAddressSpace(old->address_space);
     new->pid = ++last_pid;
     new->next = head;
     head = new;
-    MutexRelease(&process_table_mutex);
-    if(start_scheduler) {
-        StartScheduler();
-    }
+    ProcessTableRelease();
     return new->pid;
 }

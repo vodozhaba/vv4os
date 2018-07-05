@@ -373,7 +373,7 @@ void X86SchedulerTick(X86CpuState* state) {
     Process* process = UserProcessCurrent();
     if(process != NULL)
         memcpy(process->last_state, state, sizeof(*state));
-    SchedulerTick();
+    X86RestoreKernel(SchedulerTick, NULL);
 }
 
 void X86IdtInit() {
